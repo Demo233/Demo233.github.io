@@ -1,0 +1,572 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>手写基于Akka的RPC通信框架YIHAO'S BLOG</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="yihao.ml" class="blog-header-mobile-title">YIHAO'S BLOG</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/about/" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/links/" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>手写基于Akka的RPC通信框架</h4>
+    <time datetime="2018-08-15T00:00:00.000Z"><i class="fa fa-clock-o"></i>2018-08-15</time>
+    
+    
+    
+    
+	
+        <span><i class="fa fa-folder-o"></i>
+    		
+    	       <a href="/categories/编程语言/" rel="categories" data-toggle="tooltip" data-placement="top" title="Linux">编程语言</a>
+    		
+        </span>
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p>spark是一个并行分布式的计算框架，其设计阶段肯定要考虑到数据的交互。那么spark是怎么进行数据交互的？Spark是用Scala编写的，今天来看一下如何使用Scala设计一个Rpc通信服务</p>
+<h2 id="设计思路"><a href="#设计思路" class="headerlink" title="设计思路"></a>设计思路</h2><p>akka.actor.Actor 组件它于servlet有点类似，你可以把它想象成一个servlet，它同样也有自己的生命周期,preStart会在构造函数执行以后被调用，receive会在接收到消息以后被调用</p>
+<p>Actor中我们分出两类，一个叫Master，一个叫Worker</p>
+<p>Master 是头头Worker是小弟，就像Yarn里面的resourceManage和nodeManage、HDFS中的NameNode和dataNode一样,无规矩不成方圆，代码里面也是一样的。</p>
+<p>1.worker 启动后,在preStart方法中与master建立链接，向Master发送注册消息（将worker的信息通过样例类封装起来发送给master）</p>
+<p>2.Master接收到Worker的注册消息后将worker的信息保存起来，向worker反馈注册成功</p>
+<p>3.Worker定期要向master发送心跳(防止worker挂掉)</p>
+<p>4.如果worker长时间不回复，就把自己内存中的信息清除，防止将任务分配给死掉的worker</p>
+<h2 id="创建maven项目"><a href="#创建maven项目" class="headerlink" title="创建maven项目"></a>创建maven项目</h2><p>创建一个空的maven项目</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18575d5300130647.jpg" alt="image"></p>
+<p>pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">properties</span>&gt;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="tag">&lt;<span class="name">scala.version</span>&gt;</span>2.10.6<span class="tag">&lt;/<span class="name">scala.version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">scala.compat.version</span>&gt;</span>2.10<span class="tag">&lt;/<span class="name">scala.compat.version</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">properties</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependencies</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.scala-lang<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>scala-library<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>$&#123;scala.version&#125;<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.typesafe.akka<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>akka-actor_2.10<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.14<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line">  <span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>com.typesafe.akka<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>akka-remote_2.10<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.3.14<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependencies</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">build</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">sourceDirectory</span>&gt;</span>src/main/scala<span class="tag">&lt;/<span class="name">sourceDirectory</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">testSourceDirectory</span>&gt;</span>src/test/scala<span class="tag">&lt;/<span class="name">testSourceDirectory</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">plugins</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>net.alchim31.maven<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>scala-maven-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.2.2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>compile<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>testCompile<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">args</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">arg</span>&gt;</span>-make:transitive<span class="tag">&lt;/<span class="name">arg</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">arg</span>&gt;</span>-dependencyfile<span class="tag">&lt;/<span class="name">arg</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">arg</span>&gt;</span>$&#123;project.build.directory&#125;/.scala_dependencies<span class="tag">&lt;/<span class="name">arg</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">args</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line"></span><br><span class="line">    <span class="tag">&lt;<span class="name">plugin</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.apache.maven.plugins<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>maven-shade-plugin<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.4.3<span class="tag">&lt;/<span class="name">version</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;<span class="name">executions</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">execution</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">phase</span>&gt;</span>package<span class="tag">&lt;/<span class="name">phase</span>&gt;</span></span><br><span class="line">          </span><br><span class="line">          <span class="tag">&lt;<span class="name">goals</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">goal</span>&gt;</span>shade<span class="tag">&lt;/<span class="name">goal</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">goals</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">filters</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">filter</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">artifact</span>&gt;</span>*:*<span class="tag">&lt;/<span class="name">artifact</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">excludes</span>&gt;</span></span><br><span class="line">                  <span class="tag">&lt;<span class="name">exclude</span>&gt;</span>META-INF/*.SF<span class="tag">&lt;/<span class="name">exclude</span>&gt;</span></span><br><span class="line">                  <span class="tag">&lt;<span class="name">exclude</span>&gt;</span>META-INF/*.DSA<span class="tag">&lt;/<span class="name">exclude</span>&gt;</span></span><br><span class="line">                  <span class="tag">&lt;<span class="name">exclude</span>&gt;</span>META-INF/*.RSA<span class="tag">&lt;/<span class="name">exclude</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;/<span class="name">excludes</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;/<span class="name">filter</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">filters</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;<span class="name">transformers</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">transformer</span> <span class="attr">implementation</span>=<span class="string">"org.apache.maven.plugins.shade.resource.AppendingTransformer"</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">resource</span>&gt;</span>reference.conf<span class="tag">&lt;/<span class="name">resource</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;/<span class="name">transformer</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;<span class="name">transformer</span> <span class="attr">implementation</span>=<span class="string">"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"</span>&gt;</span></span><br><span class="line">                <span class="tag">&lt;<span class="name">mainClass</span>&gt;</span>com.zonegood.Master<span class="tag">&lt;/<span class="name">mainClass</span>&gt;</span></span><br><span class="line">              <span class="tag">&lt;/<span class="name">transformer</span>&gt;</span></span><br><span class="line">            <span class="tag">&lt;/<span class="name">transformers</span>&gt;</span></span><br><span class="line">          <span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;/<span class="name">execution</span>&gt;</span></span><br><span class="line">      <span class="tag">&lt;/<span class="name">executions</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">plugin</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;/<span class="name">plugins</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">build</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>如果没有src/main/scala 需要手动创建</p>
+<h2 id="编写Master"><a href="#编写Master" class="headerlink" title="编写Master"></a>编写Master</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.zonegood</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> akka.actor.&#123;<span class="type">Actor</span>, <span class="type">ActorSystem</span>, <span class="type">Props</span>&#125;</span><br><span class="line"><span class="keyword">import</span> com.typesafe.config.<span class="type">ConfigFactory</span></span><br><span class="line"><span class="keyword">import</span> com.zonegood.<span class="type">MessageBox</span>._</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> scala.collection.mutable</span><br><span class="line"><span class="keyword">import</span> scala.concurrent.duration._</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Master</span> <span class="keyword">extends</span> <span class="title">Actor</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> hashMap = <span class="keyword">new</span> mutable.<span class="type">HashMap</span>[<span class="type">String</span>,<span class="type">WorkerInfo</span>]()</span><br><span class="line">    <span class="keyword">val</span> <span class="type">CHECK_INTERVAL</span> = <span class="number">15000</span></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">preStart</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line">        println(<span class="string">"master run..."</span>)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">import</span> context.dispatcher</span><br><span class="line">        <span class="comment">// 注册定时task 如果worker长时间不回复，就把自己内存中的信息清除，防止将任务分配给死掉的worker</span></span><br><span class="line">        context.system.scheduler.schedule(<span class="number">0</span> millis,<span class="type">CHECK_INTERVAL</span> millis,</span><br><span class="line">            self,<span class="type">CheckTimeOutWorker</span>)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">receive</span></span>: <span class="type">Receive</span> = &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">WorkerStartedMessage</span>(workerId:<span class="type">String</span>,workerInfo : <span class="type">WorkerInfo</span>) =&gt; &#123;</span><br><span class="line">            println(<span class="string">"worker connect"</span>)</span><br><span class="line">            <span class="comment">// 将worker信息</span></span><br><span class="line">            hashMap.put(workerId,workerInfo)</span><br><span class="line">            <span class="comment">// 向worker反馈注册成功</span></span><br><span class="line">            sender ! <span class="type">RegisterSuccessMessage</span></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">HeartBeatMessage</span>(workerId:<span class="type">String</span>) =&gt;&#123;</span><br><span class="line">            <span class="comment">// 刷新本地worker的状态</span></span><br><span class="line">            <span class="keyword">if</span>(hashMap.contains(workerId))&#123;</span><br><span class="line">                <span class="keyword">val</span> worker = hashMap(workerId)</span><br><span class="line">                worker.flashTime = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">CheckTimeOutWorker</span> =&gt;&#123;</span><br><span class="line">            <span class="comment">// 拿到的是超时的消息，检测worker是否超时</span></span><br><span class="line">            <span class="keyword">val</span> currentTime = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">            <span class="keyword">val</span> remove = hashMap.filter(t =&gt; (currentTime - t._2.flashTime) &gt; <span class="type">CHECK_INTERVAL</span>)</span><br><span class="line">            <span class="keyword">for</span> (e &lt;- remove)&#123;</span><br><span class="line">                hashMap -= e._1</span><br><span class="line">            &#125;</span><br><span class="line">            println(hashMap.size)</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">HeartBeatSendMessage</span>(workerId) =&gt;&#123;</span><br><span class="line">            <span class="comment">// 更新</span></span><br><span class="line">            <span class="keyword">val</span> workerInfo = hashMap(workerId)</span><br><span class="line">            workerInfo.flashTime = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Master</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args : <span class="type">Array</span>[<span class="type">String</span>]) :<span class="type">Unit</span> = &#123;</span><br><span class="line">        <span class="keyword">val</span> host = args(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">val</span> port = args(<span class="number">1</span>).toInt</span><br><span class="line">        <span class="keyword">val</span> configStr =</span><br><span class="line">            <span class="string">s""</span><span class="string">"</span></span><br><span class="line"><span class="string">               |akka.actor.provider = "</span>akka.remote.<span class="type">RemoteActorRefProvider</span><span class="string">"</span></span><br><span class="line"><span class="string">               |akka.remote.netty.tcp.hostname = "</span>$<span class="string">host"</span></span><br><span class="line"><span class="string">               |akka.remote.netty.tcp.port = "</span>$<span class="string">port"</span></span><br><span class="line"><span class="string">             "</span><span class="string">""</span>.stripMargin</span><br><span class="line">        <span class="keyword">val</span> conf = <span class="type">ConfigFactory</span>.parseString(configStr)</span><br><span class="line">        <span class="keyword">val</span> masterSystem = <span class="type">ActorSystem</span>(<span class="string">"masterSystem"</span>,conf)</span><br><span class="line">        masterSystem.actorOf(<span class="type">Props</span>[<span class="type">Master</span>],<span class="string">"masterActor"</span>)</span><br><span class="line">        masterSystem.awaitTermination()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="编写Worker"><a href="#编写Worker" class="headerlink" title="编写Worker"></a>编写Worker</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.zonegood</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.<span class="type">UUID</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> akka.actor.&#123;<span class="type">Actor</span>, <span class="type">ActorSelection</span>, <span class="type">ActorSystem</span>, <span class="type">Props</span>&#125;</span><br><span class="line"><span class="keyword">import</span> com.typesafe.config.<span class="type">ConfigFactory</span></span><br><span class="line"><span class="keyword">import</span> com.zonegood.<span class="type">MessageBox</span>.&#123;<span class="type">HeartBeatMessage</span>, <span class="type">HeartBeatSendMessage</span>, <span class="type">RegisterSuccessMessage</span>, <span class="type">WorkerStartedMessage</span>&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> scala.concurrent.duration._</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Worker</span>(<span class="params">id:<span class="type">String</span>,masterHost:<span class="type">String</span>,masterPort:<span class="type">Int</span></span>) <span class="keyword">extends</span> <span class="title">Actor</span> <span class="keyword">with</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line">    <span class="keyword">var</span> master : <span class="type">ActorSelection</span> = _</span><br><span class="line">    <span class="keyword">private</span>[<span class="keyword">this</span>] <span class="keyword">val</span> <span class="type">HEART_BEAT_INTERVAL</span> = <span class="number">10000</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">val</span> workerInfo = <span class="keyword">new</span> <span class="type">WorkerInfo</span>()</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">preStart</span></span>(): <span class="type">Unit</span> = &#123;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// connect master</span></span><br><span class="line">        master = context.actorSelection(</span><br><span class="line">            <span class="string">s"akka.tcp://masterSystem@<span class="subst">$masterHost</span>:<span class="subst">$masterPort</span>/user/masterActor"</span>)</span><br><span class="line">        <span class="comment">// register</span></span><br><span class="line">        master ! <span class="keyword">new</span> <span class="type">WorkerStartedMessage</span>(<span class="keyword">this</span>.id,workerInfo)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">override</span> <span class="function"><span class="keyword">def</span> <span class="title">receive</span></span>: <span class="type">Receive</span> = &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">RegisterSuccessMessage</span> =&gt; &#123;</span><br><span class="line"></span><br><span class="line">            <span class="comment">// 注册监听器</span></span><br><span class="line">            <span class="keyword">import</span> context.dispatcher</span><br><span class="line">            context.system.scheduler.schedule(<span class="number">0</span> millis, <span class="type">HEART_BEAT_INTERVAL</span> millis</span><br><span class="line">                , self, <span class="type">HeartBeatMessage</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="type">HeartBeatMessage</span> =&gt; &#123;</span><br><span class="line">            <span class="comment">// resend message to master</span></span><br><span class="line">            master ! <span class="keyword">new</span> <span class="type">HeartBeatSendMessage</span>(<span class="keyword">this</span>.id)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">Worker</span></span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">main</span></span>(args : <span class="type">Array</span>[<span class="type">String</span>]) : <span class="type">Unit</span> = &#123;</span><br><span class="line">        <span class="keyword">val</span> host = args(<span class="number">0</span>)</span><br><span class="line">        <span class="keyword">val</span> port = args(<span class="number">1</span>).toInt</span><br><span class="line">        <span class="keyword">val</span> masterHost = args(<span class="number">2</span>)</span><br><span class="line">        <span class="keyword">val</span> masterPort = args(<span class="number">3</span>).toInt</span><br><span class="line">        <span class="keyword">val</span> configStr =</span><br><span class="line">            <span class="string">s""</span><span class="string">"</span></span><br><span class="line"><span class="string">               |akka.actor.provider = "</span>akka.remote.<span class="type">RemoteActorRefProvider</span><span class="string">"</span></span><br><span class="line"><span class="string">               |akka.remote.netty.tcp.hostname = "</span>$<span class="string">host"</span></span><br><span class="line"><span class="string">               |akka.remote.netty.tcp.port = "</span>$<span class="string">port"</span></span><br><span class="line"><span class="string">             "</span><span class="string">""</span>.stripMargin</span><br><span class="line">        <span class="keyword">val</span> conf = <span class="type">ConfigFactory</span>.parseString(configStr)</span><br><span class="line">        <span class="keyword">val</span> workerSystem = <span class="type">ActorSystem</span>(<span class="string">"workerSystem"</span>,conf)</span><br><span class="line">        workerSystem.actorOf(<span class="type">Props</span>(<span class="keyword">new</span> <span class="type">Worker</span>(<span class="type">UUID</span>.randomUUID().toString,masterHost,masterPort)),<span class="string">"workerActor"</span>)</span><br><span class="line">        workerSystem.awaitTermination()</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="样例类"><a href="#样例类" class="headerlink" title="样例类"></a>样例类</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.zonegood</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">object</span> <span class="title">MessageBox</span> </span>&#123;</span><br><span class="line">    <span class="keyword">case</span> <span class="class"><span class="keyword">class</span> <span class="title">WorkerStartedMessage</span>(<span class="params">workerId:<span class="type">String</span>,workerInfo : <span class="type">WorkerInfo</span></span>)</span></span><br><span class="line"><span class="class">    <span class="title">case</span> <span class="title">class</span> <span class="title">RegisterSuccessMessage</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="class">    <span class="title">case</span> <span class="title">class</span> <span class="title">CheckTimeOutWorker</span>(<span class="params"></span>)</span></span><br><span class="line"><span class="class">    <span class="title">case</span> <span class="title">class</span> <span class="title">HeartBeatMessage</span>(<span class="params">workerId:<span class="type">String</span></span>)</span></span><br><span class="line"><span class="class">    <span class="title">case</span> <span class="title">class</span> <span class="title">HeartBeatSendMessage</span>(<span class="params">workerId:<span class="type">String</span></span>)</span></span><br><span class="line"><span class="class">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="封装数据类"><a href="#封装数据类" class="headerlink" title="封装数据类"></a>封装数据类</h2><figure class="highlight scala"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.zonegood</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerInfo</span> <span class="keyword">extends</span> <span class="title">Serializable</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> flashTime = <span class="type">System</span>.currentTimeMillis()</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="使用maven-shade-plugin插件打包"><a href="#使用maven-shade-plugin插件打包" class="headerlink" title="使用maven-shade-plugin插件打包"></a>使用maven-shade-plugin插件打包</h2><p>1.打包Master执行 jar</p>
+<p>修改pom.xml</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">transformer</span> <span class="attr">implementation</span>=<span class="string">"org.apache.maven.plugins.shade.resource.ManifestResourceTransformer"</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">mainClass</span>&gt;</span>com.zonegood.Master<span class="tag">&lt;/<span class="name">mainClass</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">transformer</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>运行 mvn clean package</p>
+<p>mv target/my-scala-rpc-1.0-SNAPSHOT.jar ~/workspace/master.jar</p>
+<p>2.打包Worker执行 jar</p>
+<p>同理 打出worker.jar</p>
+<p>进入到~/workspace你就可以看到新的两个jar文件</p>
+<p><img src="https://i.loli.net/2019/06/30/5d185760551f758763.jpg" alt="image"></p>
+<h2 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h2><blockquote>
+<p>$ cd ~/workspace</p>
+</blockquote>
+<blockquote>
+<p>$ java -jar master.jar 127.0.0.1 8888</p>
+</blockquote>
+<blockquote>
+<p>$ java -jar worker.jar 127.0.0.1 7001 127.0.0.1 8888</p>
+</blockquote>
+<blockquote>
+<p>$ java -jar worker.jar 127.0.0.1 7002 127.0.0.1 8888</p>
+</blockquote>
+<blockquote>
+<p>$ java -jar worker.jar 127.0.0.1 7003 127.0.0.1 8888</p>
+</blockquote>
+<p>查看运行结果</p>
+<p><img src="https://i.loli.net/2019/06/30/5d185761f2eef91605.jpg" alt="image"></p>
+<p>关闭其中一个Worker查看console结果</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1857651939e43876.jpg" alt="image"></p>
+
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/Scala/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">Scala</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2018/08/16/2018-08-16-Git命令汇总/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="Git命令汇总">上一篇</a>
+		
+
+		
+		
+			<a href="/2018/08/15/2018-08-15-maven plugin/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="常用的maven插件">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("yihao.ml/2018/08/15/2018-08-15-基于Akka 的Rpc通信框架/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="yihao.ml">YIHAO'S BLOG</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>YIHAO'S BLOG</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://i.loli.net/2019/06/30/5d186da8d94aa29517.jpeg">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">126</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">46</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/大数据/">大数据</a>
+                          <span class="badge badge-default badge-pill">39</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/博客/">博客</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/ubuntu/">ubuntu</a>
+                          <span class="badge badge-default badge-pill">12</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/前端/">前端</a>
+                          <span class="badge badge-default badge-pill">5</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/后端/">后端</a>
+                          <span class="badge badge-default badge-pill">28</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/软件/">软件</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/自动化测试/">自动化测试</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/编程语言/">编程语言</a>
+                          <span class="badge badge-default badge-pill">8</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/其他/">其他</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/Autodesk/">Autodesk</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/物联网/">物联网</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/云计算/">云计算</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/算法与数据结构/">算法与数据结构</a>
+                          <span class="badge badge-default badge-pill">7</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/分布式/">分布式</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/游戏开发/">游戏开发</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/ffmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ffmpeg">ffmpeg</a></li>
+                    
+                      <li><a href="/tags/redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="redis">redis</a></li>
+                    
+                      <li><a href="/tags/nodejs/" class="tag-could" data-toggle="tooltip" data-placement="top" title="nodejs">nodejs</a></li>
+                    
+                      <li><a href="/tags/hibernate/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hibernate">hibernate</a></li>
+                    
+                      <li><a href="/tags/Hadoop/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hadoop">Hadoop</a></li>
+                    
+                      <li><a href="/tags/Spring/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spring">Spring</a></li>
+                    
+                      <li><a href="/tags/struts/" class="tag-could" data-toggle="tooltip" data-placement="top" title="struts">struts</a></li>
+                    
+                      <li><a href="/tags/FFmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FFmpeg">FFmpeg</a></li>
+                    
+                      <li><a href="/tags/selenium/" class="tag-could" data-toggle="tooltip" data-placement="top" title="selenium">selenium</a></li>
+                    
+                      <li><a href="/tags/python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="python">python</a></li>
+                    
+                      <li><a href="/tags/问题总结/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题总结">问题总结</a></li>
+                    
+                      <li><a href="/tags/shiro/" class="tag-could" data-toggle="tooltip" data-placement="top" title="shiro">shiro</a></li>
+                    
+                      <li><a href="/tags/无聊/" class="tag-could" data-toggle="tooltip" data-placement="top" title="无聊">无聊</a></li>
+                    
+                      <li><a href="/tags/问题记录/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题记录">问题记录</a></li>
+                    
+                      <li><a href="/tags/ActiveMQ/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ActiveMQ">ActiveMQ</a></li>
+                    
+                      <li><a href="/tags/Mybatis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Mybatis">Mybatis</a></li>
+                    
+                      <li><a href="/tags/Zookeeper/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Zookeeper">Zookeeper</a></li>
+                    
+                      <li><a href="/tags/RPC/" class="tag-could" data-toggle="tooltip" data-placement="top" title="RPC">RPC</a></li>
+                    
+                      <li><a href="/tags/MapReduce/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MapReduce">MapReduce</a></li>
+                    
+                      <li><a href="/tags/FTP/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FTP">FTP</a></li>
+                    
+                      <li><a href="/tags/HDFS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HDFS">HDFS</a></li>
+                    
+                      <li><a href="/tags/Hive/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hive">Hive</a></li>
+                    
+                      <li><a href="/tags/Flume/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Flume">Flume</a></li>
+                    
+                      <li><a href="/tags/Teamviewer/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Teamviewer">Teamviewer</a></li>
+                    
+                      <li><a href="/tags/forge/" class="tag-could" data-toggle="tooltip" data-placement="top" title="forge">forge</a></li>
+                    
+                      <li><a href="/tags/vue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="vue">vue</a></li>
+                    
+                      <li><a href="/tags/Scala/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Scala">Scala</a></li>
+                    
+                      <li><a href="/tags/Hbase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hbase">Hbase</a></li>
+                    
+                      <li><a href="/tags/Raspberry-Pi/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Raspberry Pi">Raspberry Pi</a></li>
+                    
+                      <li><a href="/tags/git/" class="tag-could" data-toggle="tooltip" data-placement="top" title="git">git</a></li>
+                    
+                      <li><a href="/tags/Maven/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Maven">Maven</a></li>
+                    
+                      <li><a href="/tags/Python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Python">Python</a></li>
+                    
+                      <li><a href="/tags/Spark/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spark">Spark</a></li>
+                    
+                      <li><a href="/tags/InfluxDB/" class="tag-could" data-toggle="tooltip" data-placement="top" title="InfluxDB">InfluxDB</a></li>
+                    
+                      <li><a href="/tags/Java/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Java">Java</a></li>
+                    
+                      <li><a href="/tags/Redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Redis">Redis</a></li>
+                    
+                      <li><a href="/tags/MatLab/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MatLab">MatLab</a></li>
+                    
+                      <li><a href="/tags/Kafka/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Kafka">Kafka</a></li>
+                    
+                      <li><a href="/tags/WebSocket/" class="tag-could" data-toggle="tooltip" data-placement="top" title="WebSocket">WebSocket</a></li>
+                    
+                      <li><a href="/tags/Storm/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Storm">Storm</a></li>
+                    
+                      <li><a href="/tags/CDH/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CDH">CDH</a></li>
+                    
+                      <li><a href="/tags/hue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hue">hue</a></li>
+                    
+                      <li><a href="/tags/HBase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HBase">HBase</a></li>
+                    
+                      <li><a href="/tags/JVM/" class="tag-could" data-toggle="tooltip" data-placement="top" title="JVM">JVM</a></li>
+                    
+                      <li><a href="/tags/Minecraft/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Minecraft">Minecraft</a></li>
+                    
+                      <li><a href="/tags/Azkaban/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Azkaban">Azkaban</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,679 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>HDFS and YARNYIHAO'S BLOG</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="yihao.ml" class="blog-header-mobile-title">YIHAO'S BLOG</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/about/" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/links/" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>HDFS and YARN</h4>
+    <time datetime="2017-08-21T00:00:00.000Z"><i class="fa fa-clock-o"></i>2017-08-21</time>
+    
+    
+    
+    
+	
+        <span><i class="fa fa-folder-o"></i>
+    		
+    	       <a href="/categories/大数据/" rel="categories" data-toggle="tooltip" data-placement="top" title="Linux">大数据</a>
+    		
+        </span>
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p>本文主要说明HDFS和MapReduce两门技术的入门使用.因为MapReduce太长,后面就简称MR,我们到<a href="http://hadoop.apache.org/releases.html" target="_blank" rel="noopener">官网</a>下载hadoop-2.4.1.tar.gz,并解压,进入到hadoop-2.4.1/etc/hadoop,分别配置以下几个文件</p>
+<ul>
+<li>hadoop-env.sh</li>
+<li>core-site.xml</li>
+<li>hdfs-site.xml</li>
+<li>mapred-site.xml.template(重命名为mapred-site.xml)</li>
+<li>yarn-site.xml</li>
+</ul>
+<h3 id="配置-hadoop-env-sh"><a href="#配置-hadoop-env-sh" class="headerlink" title="配置 hadoop-env.sh"></a>配置 hadoop-env.sh</h3><p>需要到hadoop-env.sh中配置Java环境,值得注意的是在hadoop-env.sh文件中使用的变量名不会生效,我们在这里写死它,查询Java存放路径</p>
+<blockquote>
+<p>ehco $JAVA_HOME</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18567363a5f26626.jpg" alt="java"></p>
+<p><img src="https://i.loli.net/2019/06/30/5d185674e1eac90408.jpg" alt></p>
+<h3 id="配置-core-site-xml"><a href="#配置-core-site-xml" class="headerlink" title="配置 core-site.xml"></a>配置 core-site.xml</h3><ol>
+<li>fs.defaultFS: 指定HADOOP所使用的文件系统访问的URI</li>
+<li>hadoop.tmp.dir: 指定hadoop运行时产生文件的存储目录</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>fs.defaultFS<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>hdfs://zyh:9000/<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>hadoop.tmp.dir<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>/media/zyh/software/hadoop-2.4.1/data/<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>这里hdfs://zyh:9000/中的zyh相当于localhost,因为我在/etc/hosts文件中修改了</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856759d07a87559.jpg" alt></p>
+<h3 id="配置-hdfs-site-xml"><a href="#配置-hdfs-site-xml" class="headerlink" title="配置 hdfs-site.xml"></a>配置 hdfs-site.xml</h3><ol>
+<li>dfs.replication: 指定HDFS切块(blk)的副本数量</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>dfs.replication<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>1<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-mapred-site-xml"><a href="#配置-mapred-site-xml" class="headerlink" title="配置 mapred-site.xml"></a>配置 mapred-site.xml</h3><ol>
+<li>mapreduce.framework.name:指定MR的运行的资源由yarn分配</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>mapreduce.framework.name<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>yarn<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="配置-yarn-site-xml"><a href="#配置-yarn-site-xml" class="headerlink" title="配置 yarn-site.xml"></a>配置 yarn-site.xml</h3><ol>
+<li>yarn.resourcemanager.hostname: 指定YARN的ResourceManager的地址,其实就是我本机zyh(127.0.0.1)</li>
+<li>yarn.nodemanager.aux-services: reducer获取数据的方式</li>
+</ol>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">configuration</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.resourcemanager.hostname<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>zyh<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;<span class="name">property</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">name</span>&gt;</span>yarn.nodemanager.aux-services<span class="tag">&lt;/<span class="name">name</span>&gt;</span></span><br><span class="line">        <span class="tag">&lt;<span class="name">value</span>&gt;</span>mapreduce_shuffle<span class="tag">&lt;/<span class="name">value</span>&gt;</span></span><br><span class="line">    <span class="tag">&lt;/<span class="name">property</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">configuration</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="将hadoop添加到环境变量"><a href="#将hadoop添加到环境变量" class="headerlink" title="将hadoop添加到环境变量"></a>将hadoop添加到环境变量</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ vim /etc/proflie</span><br><span class="line">$ export JAVA_HOME=/usr/java/jdk1.6.0_45</span><br><span class="line">$ export HADOOP_HOME=/media/zyh/software/software for linux/hadoop-2.4.1</span><br><span class="line">$ export PATH=$PATH:$JAVA_HOME/bin:$HADOOP_HOME/bin:$HADOOP_HOME/sbin</span><br><span class="line">$ source /etc/profile</span><br></pre></td></tr></table></figure>
+
+<p>这个是我本地的profile作参考</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18567686ce084291.jpg" alt="hadoop添加到环境变量"></p>
+<h3 id="初始化namenode（又叫格式化namenode）"><a href="#初始化namenode（又叫格式化namenode）" class="headerlink" title="初始化namenode（又叫格式化namenode）"></a>初始化namenode（又叫格式化namenode）</h3><blockquote>
+<p>$ hdfs namenode -format (hadoop namenode -format)</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18567a2fe3a45964.jpg" alt="初始化namenode"></p>
+<p>弹出一大片log,英语很nice可以稍微看看,不好的可以键入命令<code>echo $?</code>来校验上一个操作是否正确,如果是0就是正确的</p>
+<h2 id="启动hadoop"><a href="#启动hadoop" class="headerlink" title="启动hadoop"></a>启动hadoop</h2><p>如果你格式化namenode已成功,就可以运行hadoop了！在<strong>hadoop-2.4.1/sbin</strong>目录下面,hadoop为我们提供了很多命令</p>
+<ol>
+<li>start-all.sh : 启动dfs和yarn</li>
+<li>start-dfs.sh : 启动dfs</li>
+<li>start-yarn.sh : 启动yarn</li>
+</ol>
+<p><img src="https://i.loli.net/2019/06/30/5d18567b17a6e33029.jpg" alt></p>
+<p>作为入门的新手,我们当然是一步一步启动,先启动HDFS,再启动YARN.并观察启动后的运行状态</p>
+<h3 id="启动HDFS"><a href="#启动HDFS" class="headerlink" title="启动HDFS"></a>启动HDFS</h3><blockquote>
+<p>$ sbin/start-dfs.sh</p>
+</blockquote>
+<p>启动报错,如果说本地ssh拒绝访问,那么我们需要安装openssh-server,如果没有报错请无视！</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18567e4b37e92668.jpg" alt="报错"></p>
+<p>安装后再次键入命令.HDFS会提示会让我们输入很多次密码并确认,因为部署的是分布式系统,尽管我们只使用了一台电脑,但是HDSF不知道,他会使用SSH去访问我们远程的服务器(本例中远程服务器就是本机啦！)之后它会启动一系列进程,这些进程分别是:</p>
+<ol>
+<li>NameNode</li>
+<li>DataNode</li>
+<li>SecondaryNameNode</li>
+</ol>
+<p><img src="https://i.loli.net/2019/06/30/5d18567fd7f1683994.jpg" alt="启动HDFS"></p>
+<h3 id="启动YARN"><a href="#启动YARN" class="headerlink" title="启动YARN"></a>启动YARN</h3><blockquote>
+<p>$ sbin/start-yarn.sh</p>
+</blockquote>
+<p>yarn也是一样的一路yes并输入密码即可,yarn会先后开启两个进程,他们分别是</p>
+<ol>
+<li>ResourceManager</li>
+<li>NodeManager</li>
+</ol>
+<p><img src="https://i.loli.net/2019/06/30/5d185682ac28195281.jpg" alt="启动YARN"></p>
+<h3 id="查看启动进程的状态"><a href="#查看启动进程的状态" class="headerlink" title="查看启动进程的状态"></a>查看启动进程的状态</h3><blockquote>
+<p>$ jps</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d184751aabf122988.jpg" alt="查看启动状态"></p>
+<h2 id="使用HDFS"><a href="#使用HDFS" class="headerlink" title="使用HDFS"></a>使用HDFS</h2><p>打开网址<a href="http://zyh:50070" target="_blank" rel="noopener">http://zyh:50070</a> （HDFS管理界面）,在该界面我们可以查看HDFS的运行状态信息,在Browse the file system一栏中可以查看HDFS目录结构</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1847531472850379.jpg" alt="Browse the file system"></p>
+<p>因为我们什么都没有做,所以在Browse Directory下面什么都没有,HDFS的目录结构和linux的目录结构差不多,都是以<code>/</code>为根目录.</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1847540b49622501.jpg" alt="什么都没有"></p>
+<p>编写test.txt并上传到HDFS中(被上传的文件会被分为若干个切块，分别放于不同的datanode中)</p>
+<p><img src="https://i.loli.net/2019/06/30/5d184755225a588947.jpg" alt="test.txt"></p>
+<p>键入命令,将test.txt上传到hdfs上</p>
+<blockquote>
+<p>$ hadoop fs -put test.txt hdfs://zyh:9000/</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d1856883ee1b39713.jpg" alt="put"></p>
+<p>再次打开<a href="http://zyh:50070,查看HDFS就会发现多出了一个test.txt文件" target="_blank" rel="noopener">http://zyh:50070,查看HDFS就会发现多出了一个test.txt文件</a></p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856891db3037047.jpg" alt="查看结果"></p>
+<h2 id="使用MR"><a href="#使用MR" class="headerlink" title="使用MR"></a>使用MR</h2><p>到<strong>hadoop-2.4.1/share/hadoop/mapreduce</strong>目录下可以找到<strong>hadoop-mapreduce-examples-2.4.1.jar</strong>,这个jar是Hadoop为我们编写的mapreduce小例子,我们可以使用它来做一些测试</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18568a5a14a37356.jpg" alt="examples"></p>
+<p>我们使用MR做一些小测试！</p>
+<ul>
+<li>打印pi的值</li>
+</ul>
+<p>到<strong>hadoop-mapreduce-examples-2.4.1.jar</strong>根目录</p>
+<ol>
+<li>pi : 方法名</li>
+<li>5 : 参数1</li>
+<li>100 : 参数2</li>
+</ol>
+<blockquote>
+<p>$ hadoop jar hadoop-mapreduce-examples-2.4.1.jar pi 5 100</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18568c4251f40910.jpg" alt="pi"></p>
+<ul>
+<li>统计我们之前test.txt中字符串出现的次数</li>
+</ul>
+<blockquote>
+<p>$ cat test.txt</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18568e7a5b870045.jpg" alt="test file"></p>
+<p>这一次我们在HDFS文件系统中创建一些目录,将test.txt上传到指定目录中去</p>
+<p>创建/<strong>wordcount</strong>/<strong>input</strong>用来放被统计的文件,值得注意的是我们必须先创建/<strong>wordcount</strong>,才能再创建/<strong>input</strong></p>
+<blockquote>
+<p>$ hadoop fs -mkdir /wordcount</p>
+</blockquote>
+<blockquote>
+<p>$ hadoop fs -mkdir /wordcount/input</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18568fba13758809.jpg" alt></p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856912037076903.jpg" alt></p>
+<p>同理创建创建/<strong>wordcount</strong>/<strong>output</strong>用来放被统计后的输出文件</p>
+<blockquote>
+<p>$ hadoop fs -mkdir /wordcount</p>
+</blockquote>
+<blockquote>
+<p>$ hadoop fs -mkdir /wordcount/out </p>
+</blockquote>
+<p>将test.txt文件上传到HDFS文件系统中的input目录</p>
+<blockquote>
+<p>$ hadoop fs -put text.txt /wordcount/input </p>
+</blockquote>
+<p>使用命令对test.txt进行统计,<strong>wordcount</strong>:指定本次运行的是统计方法,/<strong>wordcount</strong>/<strong>input</strong>:指定被统计的文件,/<strong>wordcount</strong>/<strong>out</strong>: 指定统计后的输出目录</p>
+<ol>
+<li>wordcount : 方法名</li>
+<li>/wordcount/input : 参数1</li>
+<li>/wordcount/out : 参数2</li>
+</ol>
+<blockquote>
+<p>$ hadoop jar hadoop-mapreduce-examples-2.4.1.jar wordcount /wordcount/input /wordcount/out </p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d185692e5a9d43661.jpg" alt></p>
+<p>到/<strong>wordcount</strong>/<strong>out</strong>查看MR分析结果,并使用命令下载文件</p>
+<blockquote>
+<p>$ hadoop fs -ls /wordcount/out/</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d185699bc9f428703.jpg" alt></p>
+<blockquote>
+<p>$ hadoop fs -get /wordcount/out part-r-00000</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18569c354df29231.jpg" alt></p>
+<p>查看MR分析结果</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18569d7134b87906.jpg" alt></p>
+
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/Hadoop/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">Hadoop</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2017/08/22/2017-8-22-SpringMVC乱码/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="SpringMVC乱码">上一篇</a>
+		
+
+		
+		
+			<a href="/2017/08/15/2017-8-20-maven骨架无法生成/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="maven骨架无法生成在IDEA中">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("yihao.ml/2017/08/21/2017-8-21-hadoop-HDFS和YARN/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="yihao.ml">YIHAO'S BLOG</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>YIHAO'S BLOG</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://i.loli.net/2019/06/30/5d186da8d94aa29517.jpeg">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">126</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">46</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/大数据/">大数据</a>
+                          <span class="badge badge-default badge-pill">39</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/博客/">博客</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/ubuntu/">ubuntu</a>
+                          <span class="badge badge-default badge-pill">12</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/前端/">前端</a>
+                          <span class="badge badge-default badge-pill">5</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/后端/">后端</a>
+                          <span class="badge badge-default badge-pill">28</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/软件/">软件</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/自动化测试/">自动化测试</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/编程语言/">编程语言</a>
+                          <span class="badge badge-default badge-pill">8</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/其他/">其他</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/Autodesk/">Autodesk</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/物联网/">物联网</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/云计算/">云计算</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/算法与数据结构/">算法与数据结构</a>
+                          <span class="badge badge-default badge-pill">7</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/分布式/">分布式</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/游戏开发/">游戏开发</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/ffmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ffmpeg">ffmpeg</a></li>
+                    
+                      <li><a href="/tags/redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="redis">redis</a></li>
+                    
+                      <li><a href="/tags/nodejs/" class="tag-could" data-toggle="tooltip" data-placement="top" title="nodejs">nodejs</a></li>
+                    
+                      <li><a href="/tags/hibernate/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hibernate">hibernate</a></li>
+                    
+                      <li><a href="/tags/Hadoop/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hadoop">Hadoop</a></li>
+                    
+                      <li><a href="/tags/Spring/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spring">Spring</a></li>
+                    
+                      <li><a href="/tags/struts/" class="tag-could" data-toggle="tooltip" data-placement="top" title="struts">struts</a></li>
+                    
+                      <li><a href="/tags/FFmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FFmpeg">FFmpeg</a></li>
+                    
+                      <li><a href="/tags/selenium/" class="tag-could" data-toggle="tooltip" data-placement="top" title="selenium">selenium</a></li>
+                    
+                      <li><a href="/tags/python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="python">python</a></li>
+                    
+                      <li><a href="/tags/问题总结/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题总结">问题总结</a></li>
+                    
+                      <li><a href="/tags/shiro/" class="tag-could" data-toggle="tooltip" data-placement="top" title="shiro">shiro</a></li>
+                    
+                      <li><a href="/tags/无聊/" class="tag-could" data-toggle="tooltip" data-placement="top" title="无聊">无聊</a></li>
+                    
+                      <li><a href="/tags/问题记录/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题记录">问题记录</a></li>
+                    
+                      <li><a href="/tags/ActiveMQ/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ActiveMQ">ActiveMQ</a></li>
+                    
+                      <li><a href="/tags/Mybatis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Mybatis">Mybatis</a></li>
+                    
+                      <li><a href="/tags/Zookeeper/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Zookeeper">Zookeeper</a></li>
+                    
+                      <li><a href="/tags/RPC/" class="tag-could" data-toggle="tooltip" data-placement="top" title="RPC">RPC</a></li>
+                    
+                      <li><a href="/tags/MapReduce/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MapReduce">MapReduce</a></li>
+                    
+                      <li><a href="/tags/FTP/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FTP">FTP</a></li>
+                    
+                      <li><a href="/tags/HDFS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HDFS">HDFS</a></li>
+                    
+                      <li><a href="/tags/Hive/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hive">Hive</a></li>
+                    
+                      <li><a href="/tags/Flume/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Flume">Flume</a></li>
+                    
+                      <li><a href="/tags/Teamviewer/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Teamviewer">Teamviewer</a></li>
+                    
+                      <li><a href="/tags/forge/" class="tag-could" data-toggle="tooltip" data-placement="top" title="forge">forge</a></li>
+                    
+                      <li><a href="/tags/vue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="vue">vue</a></li>
+                    
+                      <li><a href="/tags/Scala/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Scala">Scala</a></li>
+                    
+                      <li><a href="/tags/Hbase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hbase">Hbase</a></li>
+                    
+                      <li><a href="/tags/Raspberry-Pi/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Raspberry Pi">Raspberry Pi</a></li>
+                    
+                      <li><a href="/tags/git/" class="tag-could" data-toggle="tooltip" data-placement="top" title="git">git</a></li>
+                    
+                      <li><a href="/tags/Maven/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Maven">Maven</a></li>
+                    
+                      <li><a href="/tags/Python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Python">Python</a></li>
+                    
+                      <li><a href="/tags/Spark/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spark">Spark</a></li>
+                    
+                      <li><a href="/tags/InfluxDB/" class="tag-could" data-toggle="tooltip" data-placement="top" title="InfluxDB">InfluxDB</a></li>
+                    
+                      <li><a href="/tags/Java/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Java">Java</a></li>
+                    
+                      <li><a href="/tags/Redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Redis">Redis</a></li>
+                    
+                      <li><a href="/tags/MatLab/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MatLab">MatLab</a></li>
+                    
+                      <li><a href="/tags/Kafka/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Kafka">Kafka</a></li>
+                    
+                      <li><a href="/tags/WebSocket/" class="tag-could" data-toggle="tooltip" data-placement="top" title="WebSocket">WebSocket</a></li>
+                    
+                      <li><a href="/tags/Storm/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Storm">Storm</a></li>
+                    
+                      <li><a href="/tags/CDH/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CDH">CDH</a></li>
+                    
+                      <li><a href="/tags/hue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hue">hue</a></li>
+                    
+                      <li><a href="/tags/HBase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HBase">HBase</a></li>
+                    
+                      <li><a href="/tags/JVM/" class="tag-could" data-toggle="tooltip" data-placement="top" title="JVM">JVM</a></li>
+                    
+                      <li><a href="/tags/Minecraft/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Minecraft">Minecraft</a></li>
+                    
+                      <li><a href="/tags/Azkaban/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Azkaban">Azkaban</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

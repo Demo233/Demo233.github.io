@@ -1,0 +1,559 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>搭建ftp服务器YIHAO'S BLOG</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="yihao.ml" class="blog-header-mobile-title">YIHAO'S BLOG</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/about/" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/links/" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>搭建ftp服务器</h4>
+    <time datetime="2017-07-23T00:00:00.000Z"><i class="fa fa-clock-o"></i>2017-07-23</time>
+    
+    
+    
+    
+	
+        <span><i class="fa fa-folder-o"></i>
+    		
+    	       <a href="/categories/ubuntu/" rel="categories" data-toggle="tooltip" data-placement="top" title="Linux">ubuntu</a>
+    		
+        </span>
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p>想要在不同操作系统之间传送数据是不是很头疼，lz操作系统是ubuntu 1.6.04，室友的操作系统是window，想给我传个文件困难重重，而且慢满的要死哟。ftp只要在同一个局域网就可以用呢，而且传输速度那个嗖嗖的，来搞吧！</p>
+<h2 id="安装vsftpd服务"><a href="#安装vsftpd服务" class="headerlink" title="安装vsftpd服务"></a>安装vsftpd服务</h2><ul>
+<li><p>安装之前先看看自己有没有安装过类似的软件呢</p>
+<blockquote>
+<p>which is vsftpd</p>
+</blockquote>
+</li>
+<li><p>使用ubuntu的apt-get安装vsftpd</p>
+<blockquote>
+<p>sudo apt-get install vsftpd</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="配置vvsftpd-conf"><a href="#配置vvsftpd-conf" class="headerlink" title="配置vvsftpd.conf"></a>配置vvsftpd.conf</h2><ul>
+<li><p>一路安装下去,成功之后去配置一下ftp的配置文件!</p>
+<blockquote>
+<p>sudo vim /etc/vsftpd.conf</p>
+</blockquote>
+</li>
+<li><p>看看我的vsftpd.conf吧！</p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br></pre></td><td class="code"><pre><span class="line">        # Example config file /etc/vsftpd.conf</span><br><span class="line">        #</span><br><span class="line">        # The default compiled in settings are fairly paranoid. This sample file</span><br><span class="line">        # loosens things up a bit, to make the ftp daemon more usable.</span><br><span class="line">        # Please see vsftpd.conf.5 for all compiled in defaults.</span><br><span class="line">        #</span><br><span class="line">        # READ THIS: This example file is NOT an exhaustive list of vsftpd options.</span><br><span class="line">        # Please read the vsftpd.conf.5 manual page to get a full idea of vsftpd&apos;s</span><br><span class="line">        # capabilities.</span><br><span class="line">        #</span><br><span class="line">        #</span><br><span class="line">        # Run standalone?  vsftpd can run either from an inetd or as a standalone</span><br><span class="line">        # daemon started from an initscript.</span><br><span class="line">        listen=NO</span><br><span class="line">        #</span><br><span class="line">        # This directive enables listening on IPv6 sockets. By default, listening</span><br><span class="line">        # on the IPv6 &quot;any&quot; address (::) will accept connections from both IPv6</span><br><span class="line">        # and IPv4 clients. It is not necessary to listen on *both* IPv4 and IPv6</span><br><span class="line">        # sockets. If you want that (perhaps because you want to listen on specific</span><br><span class="line">        # addresses) then you must run two copies of vsftpd with two configuration</span><br><span class="line">        # files.</span><br><span class="line">        listen_ipv6=YES</span><br><span class="line">        #</span><br><span class="line">        # Allow anonymous FTP? (Disabled by default).</span><br><span class="line">        anonymous_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # Uncomment this to allow local users to log in.</span><br><span class="line">        local_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # Uncomment this to enable any form of FTP write command.</span><br><span class="line">        write_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # Default umask for local users is 077. You may wish to change this to 022,</span><br><span class="line">        # if your users expect that (022 is used by most other ftpd&apos;s)</span><br><span class="line">        #local_umask=022</span><br><span class="line">        #</span><br><span class="line">        # Uncomment this to allow the anonymous FTP user to upload files. This only</span><br><span class="line">        # has an effect if the above global write enable is activated. Also, you will</span><br><span class="line">        # obviously need to create a directory writable by the FTP user.</span><br><span class="line">        anon_upload_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # Uncomment this if you want the anonymous FTP user to be able to create</span><br><span class="line">        # new directories.</span><br><span class="line">        anon_mkdir_write_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # Activate directory messages - messages given to remote users when they</span><br><span class="line">        # go into a certain directory.</span><br><span class="line">        dirmessage_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # If enabled, vsftpd will display directory listings with the time</span><br><span class="line">        # in  your  local  time  zone.  The default is to display GMT. The</span><br><span class="line">        # times returned by the MDTM FTP command are also affected by this</span><br><span class="line">        # option.</span><br><span class="line">        use_localtime=YES</span><br><span class="line">        #</span><br><span class="line">        # Activate logging of uploads/downloads.</span><br><span class="line">        xferlog_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # Make sure PORT transfer connections originate from port 20 (ftp-data).</span><br><span class="line">        connect_from_port_20=YES</span><br><span class="line">        #</span><br><span class="line">        # If you want, you can arrange for uploaded anonymous files to be owned by</span><br><span class="line">        # a different user. Note! Using &quot;root&quot; for uploaded files is not</span><br><span class="line">        # recommended!</span><br><span class="line">        #chown_uploads=YES</span><br><span class="line">        #chown_username=whoever</span><br><span class="line">        #</span><br><span class="line">        # You may override where the log file goes if you like. The default is shown</span><br><span class="line">        # below.</span><br><span class="line">        #xferlog_file=/var/log/vsftpd.log</span><br><span class="line">        #</span><br><span class="line">        # If you want, you can have your log file in standard ftpd xferlog format.</span><br><span class="line">        # Note that the default log file location is /var/log/xferlog in this case.</span><br><span class="line">        #xferlog_std_format=YES</span><br><span class="line">        #</span><br><span class="line">        # You may change the default value for timing out an idle session.</span><br><span class="line">        #idle_session_timeout=600</span><br><span class="line">        #</span><br><span class="line">        # You may change the default value for timing out a data connection.</span><br><span class="line">        #data_connection_timeout=120</span><br><span class="line">        #</span><br><span class="line">        # It is recommended that you define on your system a unique user which the</span><br><span class="line">        # ftp server can use as a totally isolated and unprivileged user.</span><br><span class="line">        #nopriv_user=ftpsecure</span><br><span class="line">        #</span><br><span class="line">        # Enable this and the server will recognise asynchronous ABOR requests. Not</span><br><span class="line">        # recommended for security (the code is non-trivial). Not enabling it,</span><br><span class="line">        # however, may confuse older FTP clients.</span><br><span class="line">        #async_abor_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # By default the server will pretend to allow ASCII mode but in fact ignore</span><br><span class="line">        # the request. Turn on the below options to have the server actually do ASCII</span><br><span class="line">        # mangling on files when in ASCII mode.</span><br><span class="line">        # Beware that on some FTP servers, ASCII support allows a denial of service</span><br><span class="line">        # attack (DoS) via the command &quot;SIZE /big/file&quot; in ASCII mode. vsftpd</span><br><span class="line">        # predicted this attack and has always been safe, reporting the size of the</span><br><span class="line">        # raw file.</span><br><span class="line">        # ASCII mangling is a horrible feature of the protocol.</span><br><span class="line">        #ascii_upload_enable=YES</span><br><span class="line">        #ascii_download_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # You may fully customise the login banner string:</span><br><span class="line">        #ftpd_banner=Welcome to blah FTP service.</span><br><span class="line">        #</span><br><span class="line">        # You may specify a file of disallowed anonymous e-mail addresses. Apparently</span><br><span class="line">        # useful for combatting certain DoS attacks.</span><br><span class="line">        #deny_email_enable=YES</span><br><span class="line">        # (default follows)</span><br><span class="line">        #banned_email_file=/etc/vsftpd.banned_emails</span><br><span class="line">        #</span><br><span class="line">        # You may restrict local users to their home directories.  See the FAQ for</span><br><span class="line">        # the possible risks in this before using chroot_local_user or</span><br><span class="line">        # chroot_list_enable below.</span><br><span class="line">        #chroot_local_user=YES</span><br><span class="line">        #</span><br><span class="line">        # You may specify an explicit list of local users to chroot() to their home</span><br><span class="line">        # directory. If chroot_local_user is YES, then this list becomes a list of</span><br><span class="line">        # users to NOT chroot().</span><br><span class="line">        # (Warning! chroot&apos;ing can be very dangerous. If using chroot, make sure that</span><br><span class="line">        # the user does not have write access to the top level directory within the</span><br><span class="line">        # chroot)</span><br><span class="line">        #chroot_local_user=YES</span><br><span class="line">        #chroot_list_enable=YES</span><br><span class="line">        # (default follows)</span><br><span class="line">        #chroot_list_file=/etc/vsftpd.chroot_list</span><br><span class="line">        #</span><br><span class="line">        # You may activate the &quot;-R&quot; option to the builtin ls. This is disabled by</span><br><span class="line">        # default to avoid remote users being able to cause excessive I/O on large</span><br><span class="line">        # sites. However, some broken FTP clients such as &quot;ncftp&quot; and &quot;mirror&quot; assume</span><br><span class="line">        # the presence of the &quot;-R&quot; option, so there is a strong case for enabling it.</span><br><span class="line">        #ls_recurse_enable=YES</span><br><span class="line">        #</span><br><span class="line">        # Customization</span><br><span class="line">        #</span><br><span class="line">        # Some of vsftpd&apos;s settings don&apos;t fit the filesystem layout by</span><br><span class="line">        # default.</span><br><span class="line">        #</span><br><span class="line">        # This option should be the name of a directory which is empty.  Also, the</span><br><span class="line">        # directory should not be writable by the ftp user. This directory is used</span><br><span class="line">        # as a secure chroot() jail at times vsftpd does not require filesystem</span><br><span class="line">        # access.</span><br><span class="line">        secure_chroot_dir=/var/run/vsftpd/empty</span><br><span class="line">        #</span><br><span class="line">        # This string is the name of the PAM service vsftpd will use.</span><br><span class="line">        pam_service_name=vsftpd</span><br><span class="line">        #</span><br><span class="line">        # This option specifies the location of the RSA certificate to use for SSL</span><br><span class="line">        # encrypted connections.</span><br><span class="line">        rsa_cert_file=/etc/ssl/certs/ssl-cert-snakeoil.pem</span><br><span class="line">        rsa_private_key_file=/etc/ssl/private/ssl-cert-snakeoil.key</span><br><span class="line">        ssl_enable=NO</span><br><span class="line">        </span><br><span class="line">        #</span><br><span class="line">        # Uncomment this to indicate that vsftpd use a utf8 filesystem.</span><br><span class="line">        #utf8_filesystem=YES</span><br><span class="line">    ```    </span><br><span class="line">* 扎心了老铁！看看英语有多重要，其实需要改动的地方有5个</span><br><span class="line">     </span><br><span class="line">     ```     </span><br><span class="line">        anonymous_enable=YES    #设置匿名可登录</span><br><span class="line">        </span><br><span class="line">        local_enable=YES        #本地用户允许登录</span><br><span class="line">        </span><br><span class="line">        write_enable=YES        #用户是否有写的权限</span><br><span class="line">        </span><br><span class="line">        anon_upload_enable=YES   #允许匿名用户上传</span><br><span class="line">        </span><br><span class="line">        anon_mkdir_write_enable=YES   #允许匿名用户创建目录文件</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>重启服务</p>
+<blockquote>
+<p>sudo service vsftpd restart</p>
+</blockquote>
+</li>
+</ul>
+<h2 id="指定上传和下载目录"><a href="#指定上传和下载目录" class="headerlink" title="指定上传和下载目录"></a>指定上传和下载目录</h2><p>其实现在已经可以访问了，lz的ip是192.168.1.19，打开浏览器输入<a href="ftp://192.168.1.19，我们访问后发现是空。原因是匿名访问默认会访问/srv/ftp,我们磁盘上本身就没动西呢！" target="_blank" rel="noopener">ftp://192.168.1.19，我们访问后发现是空。原因是匿名访问默认会访问/srv/ftp,我们磁盘上本身就没动西呢！</a></p>
+<p>我们需要上传和下载功能，在/srv/ftp/ 创建了两个文件夹，update和download。把upload的权限设置为可读可写，把download权限设置为可读不可写。上传的文件夹，其他人可以上传到这个文件夹，但是不能有删除</p>
+<p>权限，试想如果有匿名登录进来的给你删除掉了别人好心给你分享的文件还行吗？下载的文件夹，其他人只能读取这个文件夹，但是不能修改这个文件夹，也就是你要分享给其他人的文件可以放到这里面。</p>
+<blockquote>
+<p>sudo mkdir /srv/ftp/upload<br> sudo mkdir /srv/ftp/download<br> sudo chmod -R 777 /srv/ftp/update<br> sudo chmod -R 755 /srv/ftp/download</p>
+</blockquote>
+<p> 现在下面的事情就可以实现了：</p>
+<ol>
+<li><p>室友有一个非常好看的电影，发网盘又太慢，怎么办？你就把你的FTP地址扔给他让他上传到ftp://&lt;你的IP地址&gt;/upload 文件夹下吧。</p>
+</li>
+<li><p>你剪辑了一个很不错的视频短片，想分享给学校里的小伙伴，你就可以把它扔到你的FTP服务器 /srv/ftp/download 目录下，然后对小伙伴们说，我的视频已经共享了，你们到 ftp://&lt;你的IP地址&gt;/download 里面去下载吧。</p>
+<p>恩，只要你配置好了FTP，就能享受FTP局域网高速传输，分分钟搞定~~!</p>
+</li>
+</ol>
+
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2017/07/26/2017-7-26-zTree/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="zTree的使用总结">上一篇</a>
+		
+
+		
+		
+			<a href="/2017/07/23/2017-7-23-在ubuntu1.6.04安装ffmpeg/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="在ubuntu1.6.04安装ffmpeg">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("yihao.ml/2017/07/23/2017-7-23-搭建ftp服务器/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="yihao.ml">YIHAO'S BLOG</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>YIHAO'S BLOG</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://i.loli.net/2019/06/30/5d186da8d94aa29517.jpeg">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">126</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">46</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/大数据/">大数据</a>
+                          <span class="badge badge-default badge-pill">39</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/博客/">博客</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/ubuntu/">ubuntu</a>
+                          <span class="badge badge-default badge-pill">12</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/前端/">前端</a>
+                          <span class="badge badge-default badge-pill">5</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/后端/">后端</a>
+                          <span class="badge badge-default badge-pill">28</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/软件/">软件</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/自动化测试/">自动化测试</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/编程语言/">编程语言</a>
+                          <span class="badge badge-default badge-pill">8</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/其他/">其他</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/Autodesk/">Autodesk</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/物联网/">物联网</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/云计算/">云计算</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/算法与数据结构/">算法与数据结构</a>
+                          <span class="badge badge-default badge-pill">7</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/分布式/">分布式</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/游戏开发/">游戏开发</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/ffmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ffmpeg">ffmpeg</a></li>
+                    
+                      <li><a href="/tags/redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="redis">redis</a></li>
+                    
+                      <li><a href="/tags/nodejs/" class="tag-could" data-toggle="tooltip" data-placement="top" title="nodejs">nodejs</a></li>
+                    
+                      <li><a href="/tags/hibernate/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hibernate">hibernate</a></li>
+                    
+                      <li><a href="/tags/Hadoop/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hadoop">Hadoop</a></li>
+                    
+                      <li><a href="/tags/Spring/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spring">Spring</a></li>
+                    
+                      <li><a href="/tags/struts/" class="tag-could" data-toggle="tooltip" data-placement="top" title="struts">struts</a></li>
+                    
+                      <li><a href="/tags/FFmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FFmpeg">FFmpeg</a></li>
+                    
+                      <li><a href="/tags/selenium/" class="tag-could" data-toggle="tooltip" data-placement="top" title="selenium">selenium</a></li>
+                    
+                      <li><a href="/tags/python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="python">python</a></li>
+                    
+                      <li><a href="/tags/问题总结/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题总结">问题总结</a></li>
+                    
+                      <li><a href="/tags/shiro/" class="tag-could" data-toggle="tooltip" data-placement="top" title="shiro">shiro</a></li>
+                    
+                      <li><a href="/tags/无聊/" class="tag-could" data-toggle="tooltip" data-placement="top" title="无聊">无聊</a></li>
+                    
+                      <li><a href="/tags/问题记录/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题记录">问题记录</a></li>
+                    
+                      <li><a href="/tags/ActiveMQ/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ActiveMQ">ActiveMQ</a></li>
+                    
+                      <li><a href="/tags/Mybatis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Mybatis">Mybatis</a></li>
+                    
+                      <li><a href="/tags/Zookeeper/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Zookeeper">Zookeeper</a></li>
+                    
+                      <li><a href="/tags/RPC/" class="tag-could" data-toggle="tooltip" data-placement="top" title="RPC">RPC</a></li>
+                    
+                      <li><a href="/tags/MapReduce/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MapReduce">MapReduce</a></li>
+                    
+                      <li><a href="/tags/FTP/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FTP">FTP</a></li>
+                    
+                      <li><a href="/tags/HDFS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HDFS">HDFS</a></li>
+                    
+                      <li><a href="/tags/Hive/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hive">Hive</a></li>
+                    
+                      <li><a href="/tags/Flume/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Flume">Flume</a></li>
+                    
+                      <li><a href="/tags/Teamviewer/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Teamviewer">Teamviewer</a></li>
+                    
+                      <li><a href="/tags/forge/" class="tag-could" data-toggle="tooltip" data-placement="top" title="forge">forge</a></li>
+                    
+                      <li><a href="/tags/vue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="vue">vue</a></li>
+                    
+                      <li><a href="/tags/Scala/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Scala">Scala</a></li>
+                    
+                      <li><a href="/tags/Hbase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hbase">Hbase</a></li>
+                    
+                      <li><a href="/tags/Raspberry-Pi/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Raspberry Pi">Raspberry Pi</a></li>
+                    
+                      <li><a href="/tags/git/" class="tag-could" data-toggle="tooltip" data-placement="top" title="git">git</a></li>
+                    
+                      <li><a href="/tags/Maven/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Maven">Maven</a></li>
+                    
+                      <li><a href="/tags/Python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Python">Python</a></li>
+                    
+                      <li><a href="/tags/Spark/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spark">Spark</a></li>
+                    
+                      <li><a href="/tags/InfluxDB/" class="tag-could" data-toggle="tooltip" data-placement="top" title="InfluxDB">InfluxDB</a></li>
+                    
+                      <li><a href="/tags/Java/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Java">Java</a></li>
+                    
+                      <li><a href="/tags/Redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Redis">Redis</a></li>
+                    
+                      <li><a href="/tags/MatLab/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MatLab">MatLab</a></li>
+                    
+                      <li><a href="/tags/Kafka/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Kafka">Kafka</a></li>
+                    
+                      <li><a href="/tags/WebSocket/" class="tag-could" data-toggle="tooltip" data-placement="top" title="WebSocket">WebSocket</a></li>
+                    
+                      <li><a href="/tags/Storm/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Storm">Storm</a></li>
+                    
+                      <li><a href="/tags/CDH/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CDH">CDH</a></li>
+                    
+                      <li><a href="/tags/hue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hue">hue</a></li>
+                    
+                      <li><a href="/tags/HBase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HBase">HBase</a></li>
+                    
+                      <li><a href="/tags/JVM/" class="tag-could" data-toggle="tooltip" data-placement="top" title="JVM">JVM</a></li>
+                    
+                      <li><a href="/tags/Minecraft/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Minecraft">Minecraft</a></li>
+                    
+                      <li><a href="/tags/Azkaban/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Azkaban">Azkaban</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

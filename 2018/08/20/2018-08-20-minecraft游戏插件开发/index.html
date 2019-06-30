@@ -1,0 +1,610 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>minecraft游戏插件开发YIHAO'S BLOG</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="yihao.ml" class="blog-header-mobile-title">YIHAO'S BLOG</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/about/" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/links/" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>minecraft游戏插件开发</h4>
+    <time datetime="2018-08-20T00:00:00.000Z"><i class="fa fa-clock-o"></i>2018-08-20</time>
+    
+    
+    
+    
+	
+        <span><i class="fa fa-folder-o"></i>
+    		
+    	       <a href="/categories/游戏开发/" rel="categories" data-toggle="tooltip" data-placement="top" title="Linux">游戏开发</a>
+    		
+        </span>
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p>本机环境：linux下的java开发minecraft游戏插件，用maven编译打jar包。</p>
+<h4 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h4><p>正式开发之前需要准备上面提到的以外，还需要准备服务端<a href="https://bukkit.gamepedia.com/Main_Page" target="_blank" rel="noopener">下载链接</a>和客户端</p>
+<p>游戏插件开发好以后，会使用maven打成jar包，放在 服务端的 <code>plugins</code> 目录下即可生效。</p>
+<h3 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h3><p>大致步骤:</p>
+<ul>
+<li>1.创建maven项目</li>
+<li>2.修改pom.xml文件</li>
+<li>3.下载mincecraft服务器</li>
+<li>4.配置mincecraft服务器</li>
+<li>5.启动mincraft客户端</li>
+<li>6.编写第一个命令插件</li>
+<li>7.maven打包</li>
+</ul>
+<h4 id="1-创建maven项目"><a href="#1-创建maven项目" class="headerlink" title="1.创建maven项目"></a>1.创建maven项目</h4><p><img src="https://i.loli.net/2019/06/30/5d1856f72e6ec81668.jpg" alt="image"></p>
+<h4 id="2-修改pom-xml文件"><a href="#2-修改pom-xml文件" class="headerlink" title="2.修改pom.xml文件"></a>2.修改pom.xml文件</h4><p>这里用的是Bukkit的服务器，所以需要引入第三方仓库</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">repositories</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">repository</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">id</span>&gt;</span>spigot-repo<span class="tag">&lt;/<span class="name">id</span>&gt;</span></span><br><span class="line">		<span class="tag">&lt;<span class="name">url</span>&gt;</span>https://hub.spigotmc.org/nexus/content/repositories/snapshots/<span class="tag">&lt;/<span class="name">url</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;/<span class="name">repository</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">repositories</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>接着引入开发库</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.bukkit<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>bukkit<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.12.2-R0.1-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span><span class="comment">&lt;!--change this value depending on the version or use LATEST--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">type</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">scope</span>&gt;</span>runtime<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.spigotmc<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spigot-api<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">version</span>&gt;</span>1.12.2-R0.1-SNAPSHOT<span class="tag">&lt;/<span class="name">version</span>&gt;</span><span class="comment">&lt;!--change this value depending on the version--&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">type</span>&gt;</span>jar<span class="tag">&lt;/<span class="name">type</span>&gt;</span></span><br><span class="line">	<span class="tag">&lt;<span class="name">scope</span>&gt;</span>provided<span class="tag">&lt;/<span class="name">scope</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>使用<code>maven-assembly-plugin</code>插件打jar包</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">&lt;plugin&gt;</span><br><span class="line">	&lt;artifactId&gt;maven-assembly-plugin&lt;/artifactId&gt;</span><br><span class="line">	&lt;configuration&gt;</span><br><span class="line">	&lt;descriptorRefs&gt;</span><br><span class="line">		&lt;descriptorRef&gt;jar-with-dependencies&lt;/descriptorRef&gt;</span><br><span class="line">	&lt;/descriptorRefs&gt;</span><br><span class="line">	&lt;!--&lt;archive&gt;</span><br><span class="line">		&lt;manifest&gt;</span><br><span class="line">		&lt;mainClass&gt;org.bukkit.Server&lt;/mainClass&gt;</span><br><span class="line">		&lt;/manifest&gt;</span><br><span class="line">	&lt;/archive&gt;--&gt;</span><br><span class="line">	&lt;/configuration&gt;</span><br><span class="line">	&lt;executions&gt;</span><br><span class="line">	&lt;execution&gt;</span><br><span class="line">		&lt;id&gt;make-assembly&lt;/id&gt;</span><br><span class="line">		&lt;phase&gt;package&lt;/phase&gt;</span><br><span class="line">		&lt;goals&gt;</span><br><span class="line">		&lt;goal&gt;single&lt;/goal&gt;</span><br><span class="line">		&lt;/goals&gt;</span><br><span class="line">	&lt;/execution&gt;</span><br><span class="line">	&lt;/executions&gt;</span><br><span class="line">&lt;/plugin&gt;</span><br></pre></td></tr></table></figure>
+
+<h4 id="3-下载mincecraft服务器craftbukkit-1-7-2-R0-4-20140316-221310-4-jar"><a href="#3-下载mincecraft服务器craftbukkit-1-7-2-R0-4-20140316-221310-4-jar" class="headerlink" title="3.下载mincecraft服务器craftbukkit-1.7.2-R0.4-20140316.221310-4.jar"></a>3.下载mincecraft服务器craftbukkit-1.7.2-R0.4-20140316.221310-4.jar</h4><p><a href="https://getbukkit.org/" target="_blank" rel="noopener">https://getbukkit.org/</a></p>
+<h4 id="4-配置服务器"><a href="#4-配置服务器" class="headerlink" title="4.配置服务器"></a>4.配置服务器</h4><p>1.编写run.sh脚本，启动服务器</p>
+<blockquote>
+<p>$ touch run.sh</p>
+</blockquote>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/bash</span></span><br><span class="line">echo "start bukkit server"</span><br><span class="line">java -Xms1024M -Xmx1024M -jar craftbukkit-1.7.2-R0.4-20140316.221310-4.jar</span><br></pre></td></tr></table></figure>
+
+<p>修改run.sh为可执行文件</p>
+<blockquote>
+<p>$ chmod 777 run.sh  </p>
+</blockquote>
+<p>运行run.sh脚本</p>
+<blockquote>
+<p>$ ./run.sh</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d1856fb51bf813866.jpg" alt="image"></p>
+<p>启动以后会发现当前目录会生成很多文件</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1856fc6032c82786.jpg" alt="image"></p>
+<p>2.修改服务器参数server.properties</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">#Minecraft server properties</span><br><span class="line">#Thu Aug 16 00:01:18 CST 2018</span><br><span class="line">generator-settings=</span><br><span class="line">op-permission-level=4</span><br><span class="line">allow-nether=true</span><br><span class="line">online-model=false</span><br><span class="line">level-name=world</span><br><span class="line">enable-query=false</span><br><span class="line">allow-flight=false</span><br><span class="line">announce-player-achievements=true</span><br><span class="line">server-port=25565</span><br><span class="line">level-type=DEFAULT</span><br><span class="line">enable-rcon=false</span><br><span class="line">force-gamemode=false</span><br><span class="line">level-seed=</span><br><span class="line">server-ip=</span><br><span class="line">max-build-height=256</span><br><span class="line">spawn-npcs=true</span><br><span class="line">white-list=false</span><br><span class="line">spawn-animals=true</span><br><span class="line">hardcore=false</span><br><span class="line">snooper-enabled=true</span><br><span class="line">online-mode=false</span><br><span class="line">resource-pack=</span><br><span class="line">pvp=true</span><br><span class="line">difficulty=1</span><br><span class="line">enable-command-block=true</span><br><span class="line">gamemode=0</span><br><span class="line">player-idle-timeout=0</span><br><span class="line">max-players=20</span><br><span class="line">spawn-monsters=true</span><br><span class="line">generate-structures=true</span><br><span class="line">view-distance=10</span><br><span class="line">spawn-protection=16</span><br><span class="line">motd=A Minecraft Server</span><br></pre></td></tr></table></figure>
+
+<p>具体配置可以查看<a href="https://minecraft.gamepedia.com/Server.properties" target="_blank" rel="noopener">wiki</a></p>
+<p>重新启动服务器使其生效。</p>
+<h4 id="5-启动mincraft客户端"><a href="#5-启动mincraft客户端" class="headerlink" title="5.启动mincraft客户端"></a>5.启动mincraft客户端</h4><p>想要启动<code>minecraft客户端</code>，需要提前准备一个启动器。</p>
+<p><code>minecraft启动器</code>和<code>minecraft客户端</code>这篇博客<a href="https://www.linuxidc.com/Linux/2016-04/129764.htm有下载链接，不过里面的``minecraft客户端``启动会抛异常，可能是因为是linux的原因，在下载1.7.2的时候某些jar包损坏导致无法正常启动,后续通过排查找到损坏的jar，从新到网上下载完好的jar才得以解决。如果你用的也是linux，可以联系我，为你提供一个完好版本，当然也可以从网上搜一下，很好解决的。" target="_blank" rel="noopener">https://www.linuxidc.com/Linux/2016-04/129764.htm有下载链接，不过里面的``minecraft客户端``启动会抛异常，可能是因为是linux的原因，在下载1.7.2的时候某些jar包损坏导致无法正常启动,后续通过排查找到损坏的jar，从新到网上下载完好的jar才得以解决。如果你用的也是linux，可以联系我，为你提供一个完好版本，当然也可以从网上搜一下，很好解决的。</a></p>
+<p>下载好启动器和客户端以后，我们先运行启动器，同服务端一样，编写<code>run.sh</code> 脚本运行<code>minecraft启动器</code>,run.sh内容如下:</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">!/bin/bash</span></span><br><span class="line"></span><br><span class="line">echo "run minecraft client on linux os..."</span><br><span class="line">java -jar HMCL-2.1.7.jar</span><br></pre></td></tr></table></figure>
+
+<p>使用下面命令运行启动器</p>
+<blockquote>
+<p>$ ./run.sh</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d1856fe62aef11769.jpg" alt="image"></p>
+<p>进入游戏，选择Multiplayer开启多人游戏即可</p>
+<p><img src="https://i.loli.net/2019/06/30/5d1857246385939797.jpg" alt="image"></p>
+<p><img src="https://i.loli.net/2019/06/30/5d185725b548c74359.jpg" alt="image"></p>
+<h4 id="6-编写第一个命令插件"><a href="#6-编写第一个命令插件" class="headerlink" title="6.编写第一个命令插件"></a>6.编写第一个命令插件</h4><p>这个命令暂时叫做example，当用户在游戏内输入example时，作出相应提示</p>
+<p><img src="https://i.loli.net/2019/06/30/5d185726a66a236707.jpg" alt="image"></p>
+<p><img src="https://i.loli.net/2019/06/30/5d185727b5ae799111.jpg" alt="image"></p>
+<hr>
+<p>当服务器启动以后，会加载放在plugin目录下实现JavaPlugin的类，触发它的onEnable方法</p>
+<p>在src/main/java下创建FirstPlugin.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.zonegood;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.bukkit.entity.Player;</span><br><span class="line"><span class="keyword">import</span> org.bukkit.plugin.java.JavaPlugin;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> zyh</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">FirstPlugin</span> <span class="keyword">extends</span> <span class="title">JavaPlugin</span> </span>&#123;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEnable</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.getLogger().info(<span class="string">"FirstPlugin running..."</span>);</span><br><span class="line">        <span class="comment">// 加载CommandExample指令</span></span><br><span class="line">        <span class="keyword">this</span>.getCommand(<span class="string">"example"</span>).setExecutor(<span class="keyword">new</span> CommondExample());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDisable</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Player player : getServer().getOnlinePlayers())&#123;</span><br><span class="line">            <span class="keyword">this</span>.getLogger().info(<span class="string">"disable method"</span> + player.getName());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这边对指令类进行封装，指令需要实现<code>CommandExecutor</code>类，实现<code>onCommand</code>方法，当系统检测到有人发送example指令时，<code>onCommand</code>方法就会被触发，当然前提是，它必须已被注册。</p>
+<p>在src/main/java/目录下创建CommondExample.java</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">package</span> com.zonegood;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> org.bukkit.command.Command;</span><br><span class="line"><span class="keyword">import</span> org.bukkit.command.CommandExecutor;</span><br><span class="line"><span class="keyword">import</span> org.bukkit.command.CommandSender;</span><br><span class="line"><span class="keyword">import</span> org.bukkit.entity.Player;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> zyh</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CommondExample</span> <span class="keyword">implements</span> <span class="title">CommandExecutor</span></span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String commandName = <span class="string">"example"</span>;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onCommand</span><span class="params">(CommandSender commandSender, Command command, String s, String[] strings)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span>(commandName.equalsIgnoreCase(command.getName()))&#123;</span><br><span class="line">            ((Player)commandSender).sendMessage(((Player)commandSender).getName() + <span class="string">"execute example command"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>在src/resources/目录下创建<code>plugin.yml</code>,在里面我们需要对<code>example</code>指令进行描述</p>
+<p><code>aliases</code> 可以理解为<code>example</code>指令的昵称，在游戏内输入<code>a1</code>,<code>a2</code> 等价于输入<code>example</code></p>
+<p>除此之外里面还有其他参数，详情参考<a href="https://bukkit.gamepedia.com/Plugin_YAML" target="_blank" rel="noopener">wiki</a></p>
+<figure class="highlight yml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">name:</span> <span class="string">firstplugin</span></span><br><span class="line"><span class="attr">version:</span> <span class="number">1.0</span></span><br><span class="line"><span class="attr">description:</span> <span class="string">This</span> <span class="string">plugin</span> <span class="string">is</span> <span class="string">so</span> <span class="number">31337.</span> <span class="string">You</span> <span class="string">can</span> <span class="string">set</span> <span class="string">yourself</span> <span class="string">on</span> <span class="string">fire.</span></span><br><span class="line"><span class="comment"># We could place every author in the authors list, but chose not to for illustrative purposes</span></span><br><span class="line"><span class="comment"># Also, having an author distinguishes that person as the project lead, and ensures their</span></span><br><span class="line"><span class="comment"># name is displayed first</span></span><br><span class="line"><span class="attr">author:</span> <span class="string">Zyh</span></span><br><span class="line"><span class="attr">authors:</span> <span class="string">[zyh]</span></span><br><span class="line"><span class="attr">website:</span> <span class="attr">http://www.zonegood.com</span></span><br><span class="line"></span><br><span class="line"><span class="attr">main:</span> <span class="string">com.zonegood.FirstPlugin</span></span><br><span class="line"></span><br><span class="line"><span class="attr">commands:</span></span><br><span class="line"><span class="attr"> example:</span></span><br><span class="line"><span class="attr">   description:</span> <span class="string">Set</span> <span class="string">yourself</span> <span class="string">on</span> <span class="string">fire.</span></span><br><span class="line"><span class="attr">   aliases:</span> <span class="string">[a1,a2]</span></span><br><span class="line"><span class="attr">   usage:</span> <span class="string">Syntax</span> <span class="string">error!</span> <span class="string">Simply</span> <span class="string">type</span> <span class="string">/&amp;lt;command&amp;gt;</span> <span class="string">to</span> <span class="string">ignite</span> <span class="string">yourself.</span></span><br></pre></td></tr></table></figure>
+
+<p>项目的整体目录结构</p>
+<p><img src="https://i.loli.net/2019/06/30/5d18572aacde984821.jpg" alt="image"></p>
+<h4 id="7-maven打包"><a href="#7-maven打包" class="headerlink" title="7.maven打包"></a>7.maven打包</h4><p>下面的指令会将编写好的代码编译打包成jar，放在target目录下</p>
+<blockquote>
+<p>$ mvn clean package</p>
+</blockquote>
+<p><img src="https://i.loli.net/2019/06/30/5d18573864f8624500.jpg" alt="image"></p>
+<p>可以看到</p>
+<p><code>Building jar: /media/zyh/workspace/workspace/IDEA/bukiitplugin/target/bukiitplugin-1.0-SNAPSHOT.jar</code></p>
+<p>将bukiitplugin-1.0-SNAPSHOT.jar拷贝到server/plugins/目录下重新启动服务器即可</p>
+<h2 id="资料"><a href="#资料" class="headerlink" title="资料"></a>资料</h2><p>官方开发文档：<a href="https://bukkit.gamepedia.com/Main_Page" target="_blank" rel="noopener">https://bukkit.gamepedia.com/Main_Page</a></p>
+<p><img src="https://i.loli.net/2019/06/30/5d18573aed0a023310.jpg" alt="image"></p>
+<p>Developers一栏就是了</p>
+
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/Minecraft/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">Minecraft</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2018/08/26/2018-08-26-virtualenv搭建/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="virtualenv搭建">上一篇</a>
+		
+
+		
+		
+			<a href="/2018/08/17/2018-08-17-maven exclusion/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="maven exclusion">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("yihao.ml/2018/08/20/2018-08-20-minecraft游戏插件开发/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="yihao.ml">YIHAO'S BLOG</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>YIHAO'S BLOG</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://i.loli.net/2019/06/30/5d186da8d94aa29517.jpeg">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">126</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">46</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/大数据/">大数据</a>
+                          <span class="badge badge-default badge-pill">39</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/博客/">博客</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/ubuntu/">ubuntu</a>
+                          <span class="badge badge-default badge-pill">12</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/前端/">前端</a>
+                          <span class="badge badge-default badge-pill">5</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/后端/">后端</a>
+                          <span class="badge badge-default badge-pill">28</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/软件/">软件</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/自动化测试/">自动化测试</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/编程语言/">编程语言</a>
+                          <span class="badge badge-default badge-pill">8</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/其他/">其他</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/Autodesk/">Autodesk</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/物联网/">物联网</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/云计算/">云计算</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/算法与数据结构/">算法与数据结构</a>
+                          <span class="badge badge-default badge-pill">7</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/分布式/">分布式</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/游戏开发/">游戏开发</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/ffmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ffmpeg">ffmpeg</a></li>
+                    
+                      <li><a href="/tags/redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="redis">redis</a></li>
+                    
+                      <li><a href="/tags/nodejs/" class="tag-could" data-toggle="tooltip" data-placement="top" title="nodejs">nodejs</a></li>
+                    
+                      <li><a href="/tags/hibernate/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hibernate">hibernate</a></li>
+                    
+                      <li><a href="/tags/Hadoop/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hadoop">Hadoop</a></li>
+                    
+                      <li><a href="/tags/Spring/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spring">Spring</a></li>
+                    
+                      <li><a href="/tags/struts/" class="tag-could" data-toggle="tooltip" data-placement="top" title="struts">struts</a></li>
+                    
+                      <li><a href="/tags/FFmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FFmpeg">FFmpeg</a></li>
+                    
+                      <li><a href="/tags/selenium/" class="tag-could" data-toggle="tooltip" data-placement="top" title="selenium">selenium</a></li>
+                    
+                      <li><a href="/tags/python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="python">python</a></li>
+                    
+                      <li><a href="/tags/问题总结/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题总结">问题总结</a></li>
+                    
+                      <li><a href="/tags/shiro/" class="tag-could" data-toggle="tooltip" data-placement="top" title="shiro">shiro</a></li>
+                    
+                      <li><a href="/tags/无聊/" class="tag-could" data-toggle="tooltip" data-placement="top" title="无聊">无聊</a></li>
+                    
+                      <li><a href="/tags/问题记录/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题记录">问题记录</a></li>
+                    
+                      <li><a href="/tags/ActiveMQ/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ActiveMQ">ActiveMQ</a></li>
+                    
+                      <li><a href="/tags/Mybatis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Mybatis">Mybatis</a></li>
+                    
+                      <li><a href="/tags/Zookeeper/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Zookeeper">Zookeeper</a></li>
+                    
+                      <li><a href="/tags/RPC/" class="tag-could" data-toggle="tooltip" data-placement="top" title="RPC">RPC</a></li>
+                    
+                      <li><a href="/tags/MapReduce/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MapReduce">MapReduce</a></li>
+                    
+                      <li><a href="/tags/FTP/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FTP">FTP</a></li>
+                    
+                      <li><a href="/tags/HDFS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HDFS">HDFS</a></li>
+                    
+                      <li><a href="/tags/Hive/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hive">Hive</a></li>
+                    
+                      <li><a href="/tags/Flume/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Flume">Flume</a></li>
+                    
+                      <li><a href="/tags/Teamviewer/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Teamviewer">Teamviewer</a></li>
+                    
+                      <li><a href="/tags/forge/" class="tag-could" data-toggle="tooltip" data-placement="top" title="forge">forge</a></li>
+                    
+                      <li><a href="/tags/vue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="vue">vue</a></li>
+                    
+                      <li><a href="/tags/Scala/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Scala">Scala</a></li>
+                    
+                      <li><a href="/tags/Hbase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hbase">Hbase</a></li>
+                    
+                      <li><a href="/tags/Raspberry-Pi/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Raspberry Pi">Raspberry Pi</a></li>
+                    
+                      <li><a href="/tags/git/" class="tag-could" data-toggle="tooltip" data-placement="top" title="git">git</a></li>
+                    
+                      <li><a href="/tags/Maven/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Maven">Maven</a></li>
+                    
+                      <li><a href="/tags/Python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Python">Python</a></li>
+                    
+                      <li><a href="/tags/Spark/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spark">Spark</a></li>
+                    
+                      <li><a href="/tags/InfluxDB/" class="tag-could" data-toggle="tooltip" data-placement="top" title="InfluxDB">InfluxDB</a></li>
+                    
+                      <li><a href="/tags/Java/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Java">Java</a></li>
+                    
+                      <li><a href="/tags/Redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Redis">Redis</a></li>
+                    
+                      <li><a href="/tags/MatLab/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MatLab">MatLab</a></li>
+                    
+                      <li><a href="/tags/Kafka/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Kafka">Kafka</a></li>
+                    
+                      <li><a href="/tags/WebSocket/" class="tag-could" data-toggle="tooltip" data-placement="top" title="WebSocket">WebSocket</a></li>
+                    
+                      <li><a href="/tags/Storm/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Storm">Storm</a></li>
+                    
+                      <li><a href="/tags/CDH/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CDH">CDH</a></li>
+                    
+                      <li><a href="/tags/hue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hue">hue</a></li>
+                    
+                      <li><a href="/tags/HBase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HBase">HBase</a></li>
+                    
+                      <li><a href="/tags/JVM/" class="tag-could" data-toggle="tooltip" data-placement="top" title="JVM">JVM</a></li>
+                    
+                      <li><a href="/tags/Minecraft/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Minecraft">Minecraft</a></li>
+                    
+                      <li><a href="/tags/Azkaban/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Azkaban">Azkaban</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>

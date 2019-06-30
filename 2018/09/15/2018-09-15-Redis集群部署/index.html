@@ -1,0 +1,629 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!doctype html>
+<html lang>
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+  <meta name="renderer" content="webkit">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, shrink-to-fit=no" , user-scalable="no"">
+  <title>Redis集群部署YIHAO'S BLOG</title>
+  <link rel="shortcut icon" href>
+  
+    
+    
+      <link rel="stylesheet" href="/css/bootstrap.min.css">
+    
+      <link rel="stylesheet" href="/css/font-awesome.min.css">
+    
+      <link rel="stylesheet" href="/css/atom-one-dark.css">
+    
+      <link rel="stylesheet" href="/css/jquery.fancybox.css">
+    
+      <link rel="stylesheet" href="/css/nprogress.min.css">
+    
+      <link rel="stylesheet" href="/css/valine.css">
+    
+      <link rel="stylesheet" href="/css/life.css">
+    
+  
+
+  
+
+  <!-- jQuery first, then Tether, then Bootstrap JS. -->
+  
+  
+  
+    <script src="/js/jquery-2.2.4.min.js"></script>
+  
+    <script src="https://cdn1.lncld.net/static/js/3.1.0/av-min.js"></script>
+  
+    <script src="/js/jquery.pjax.js"></script>
+  
+    <script src="/js/nprogress.min.js"></script>
+  
+    <script src="/js/tether.min.js"></script>
+  
+    <script src="/js/bootstrap.min.js"></script>
+  
+    <script src="/js/highlight.min.js"></script>
+  
+    <script src="/js/highlightjs-line-numbers.min.js"></script>
+  
+    <script src="/js/jquery.fancybox.js"></script>
+  
+    <script src="/js/jquery.qrcode.min.js"></script>
+  
+    <script src="/js/Valine.min.js"></script>
+  
+  
+</head>
+<body>
+<script>AV.init({appId:'',appKey:''});</script>
+<script type="text/javascript">
+      var config = {
+            ClasS: 'Counter',
+            el:'.views',
+            elP: '.views-post'
+      }
+</script>
+<div class="container">
+    <div class="row blog-box-shadow">
+        <!--博客主栏开始-->
+        <div class="col-xl-9 col-lg-12 blog-main" id="pjax-box">
+            <header class="blog-header">
+                <a href="yihao.ml" class="blog-header-mobile-title">YIHAO'S BLOG</a>
+                <a href="javascript:;" class="blog-header-navbar-btn"><i class="fa fa-bars"></i></a>
+                <nav class="blog-header-navbar blog-header-fixed">
+                    <ul class="blog-navbar-links">
+                        
+                          <li class="blog-nav-item"><a href="/" class="transition">首页</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/about/" class="transition">关于</a></li>
+                        
+                          <li class="blog-nav-item"><a href="/links/" class="transition">链接</a></li>
+                        
+                        <div class="blog-navbar-right">
+                            <form action>
+                                <div class="input-group">
+                                    <input type="text" class="blog-header-search" placeholder="search...">
+                                    <buttn type="submit" class="blog-header-search-btn"><i class="fa fa-search"></i></buttn>
+                                </div>
+                            </form>
+                        </div>
+                    </ul>
+                </nav>
+            </header>
+                
+<header class="blog-post-page-title">
+    <h4>Redis集群部署</h4>
+    <time datetime="2018-09-15T00:00:00.000Z"><i class="fa fa-clock-o"></i>2018-09-15</time>
+    
+    
+    
+    
+	
+        <span><i class="fa fa-folder-o"></i>
+    		
+    	       <a href="/categories/后端/" rel="categories" data-toggle="tooltip" data-placement="top" title="Linux">后端</a>
+    		
+        </span>
+	
+    
+</header>
+<div class="blog-main-post blog-post-page-box">
+    <article class="blog-post-block blog-post-page-content">
+        <section>
+            
+                <p>redis 是一个高性能的&lt;K,V&gt;分布式缓存数据库。</p>
+<p>参考博客<a href="http://blog.csdn.net/myrainblues/article/details/25881535" target="_blank" rel="noopener">http://blog.csdn.net/myrainblues/article/details/25881535</a></p>
+<h3 id="安装Redis3集群（3台Linux-storm1-storm2-storm3）"><a href="#安装Redis3集群（3台Linux-storm1-storm2-storm3）" class="headerlink" title="安装Redis3集群（3台Linux storm1,storm2,storm3）"></a>安装Redis3集群（3台Linux storm1,storm2,storm3）</h3><p>1.下载redis的稳定版本</p>
+<p>下载地址<a href="http://download.redis.io/releases/" target="_blank" rel="noopener">http://download.redis.io/releases/</a></p>
+<blockquote>
+<p>需要注意的是redis版本一定要在3.x以上，不然不支持集群</p>
+</blockquote>
+<p>2.上传redis到服务器</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">for n in &#123;1..5&#125;; do scp redis-4.0.11.tar.gz zyh@cor$n:/usr/local/src/; done</span><br></pre></td></tr></table></figure>
+
+<p>3.解压</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="meta">$</span> tar -zxvf redis-4.0.11.tar.gz -C ./</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>需要注意的是在操作之前一定要保证权限正确</p>
+</blockquote>
+<p>4.进入到源码包中，编译并安装redis</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">cd /usr/local/src/redis-3.0.7/</span><br><span class="line">make &amp;&amp; make install</span><br></pre></td></tr></table></figure>
+
+<p>进入<code>/usr/local/bin</code> 查看安装后的结果</p>
+<p>解释一下后续比较关键的几个命令</p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>作用</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>redis-server</td>
+<td>启动redis服务</td>
+<td></td>
+</tr>
+<tr>
+<td>redis-cli</td>
+<td>启动客户端</td>
+<td></td>
+</tr>
+<tr>
+<td>redis-trib.rb</td>
+<td>启动redis-cluster</td>
+<td>需要ruby的支持才能用，文件存放在/redis/src/目录下</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>make编译需要GCC的支持,redis-trib工具则需要ruby和gem的支持,下面说一下ruby和gem的安装</p>
+</blockquote>
+<p>5.安装所有依赖</p>
+<p>安装gcc</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install gcc</span><br></pre></td></tr></table></figure>
+
+<p>安装ruby和gem</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">yum -y install ruby rubygems</span><br></pre></td></tr></table></figure>
+
+<p>使用gem下载redis集群的配置脚本</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install redis</span><br></pre></td></tr></table></figure>
+
+<p>gem install的安装包会放在<code>/usr/lib/ruby/gems/1.8/cache</code>目录下</p>
+<p>如果遇到redis requires Ruby version &gt;= 2.2.2的问题解决方案:<a href="https://www.jianshu.com/p/0a5de7dc0254" target="_blank" rel="noopener">https://www.jianshu.com/p/0a5de7dc0254</a></p>
+<blockquote>
+<p>原因是Ruby的版本太低，只要升级Ruby的版本即可。这边移除ruby 2.0.0版本，重新安装 2.3.3版本即可解决问题</p>
+</blockquote>
+<p>如果redis所在服务器不能上网怎么办?</p>
+<p>比如想要将下载好的<code>redis-3.2.2.gem</code>拷贝到其他服务器，手动安装即可</p>
+<p><code>shell
+cd /usr/lib/ruby/gems/1.8/cache
+for n in {2..6}; do scp redis-3.2.2.gem 192.168.0.3$n:$PWD; done</code></p>
+<p>在需要安装的机器上执行下面命令安装</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">gem install --local /usr/lib/ruby/gems/1.8/cache/redis-3.2.2.gem</span><br></pre></td></tr></table></figure>
+
+<p>7.部署storm2和storm3</p>
+<p>用同样的方式在其他的机器上编译安装redis</p>
+<p>8.修改所有机器的配置文件redis.conf</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">port 6379 #端口</span><br><span class="line">pidfile /var/run/redis-6379.pid </span><br><span class="line">daemonize yes</span><br><span class="line">cluster-enabled yes</span><br><span class="line">appendonly yes</span><br><span class="line">appendfsync no #AOF 策略，参考上篇博客</span><br><span class="line">bind $&#123;host&#125;</span><br></pre></td></tr></table></figure>
+
+<p>9.启动所有机器上的redis节点</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-server /etc/redis.conf</span><br></pre></td></tr></table></figure>
+
+<p>10.使用redis-trib配置redis集群</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd /usr/local/src/redis-4.0.11/src/</span><br><span class="line">sudo cp /usr/local/src/redis-4.0.11/src/redis-trib.rb /usr/local/bin/</span><br></pre></td></tr></table></figure>
+
+<p>检查防火墙，如果开启需要关闭</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">service iptables status</span><br></pre></td></tr></table></figure>
+
+<p>使用redis-trib.rb集群构建工具启动集群</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-trib.rb create --replicas 0  192.168.1.19:6379 192.168.1.20:6379 192.168.1.21:6379</span><br></pre></td></tr></table></figure>
+
+<p>遇到 Can I set the above configuration? (type ‘yes’ to accept):输入yes回车即可</p>
+<p>这边运行以后报了个错误<code>ERR Slot 0 is already busy (Redis::CommandError)</code></p>
+<p><img src="http://ww1.sinaimg.cn/large/0066vfZIgy1fva7lnw930j30s705fq54.jpg" alt="image"></p>
+<p>原因是因为之前我已经配置过一次，再次使用就会出现<code>slot 0</code>被占用的结果，用<code>redis-cli</code> 登录到每个节点执行  <code>flushall</code>  和 <code>cluster reset</code>  就可以了。</p>
+<p>博客:<a href="https://blog.csdn.net/xiaojin21cen/article/details/70445545" target="_blank" rel="noopener">https://blog.csdn.net/xiaojin21cen/article/details/70445545</a></p>
+<p>启动成功后:</p>
+<p><img src="https://i.loli.net/2018/12/02/5c033cda85ac2.png" alt="snapshot.png"></p>
+<p>11.测试</p>
+<p>在storm1节点上set一个值，在storm2上查看值,storm1的ip 192.168.1.19 ;storm2的 ip 192.168.1.20</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -h storm1 -p 6379</span><br><span class="line">set zyh zyh</span><br></pre></td></tr></table></figure>
+
+<p>在storm2上查看</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -h storm2 -p 6379</span><br><span class="line">get zyh</span><br></pre></td></tr></table></figure>
+
+<p>报了错误:(error) MOVED 166 192.168.1.19:6379</p>
+<p><img src="https://i.loli.net/2018/12/02/5c033dbda6c1c.png" alt="snapshot.png"></p>
+<p>解决办法:在链接客户端时带上-c参数,参考<a href="https://www.oschina.net/question/1259683_2133954" target="_blank" rel="noopener">https://www.oschina.net/question/1259683_2133954</a></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -c -h storm2 -p 6379</span><br></pre></td></tr></table></figure>
+
+<p><img src="https://i.loli.net/2018/12/02/5c0344e7ce059.png" alt="snapshot.png"></p>
+
+            
+        </section>
+        <footer class="blog-post-page-tags">
+        
+			
+				
+			<a href="/tags/Redis/" rel="tag" data-toggle="tooltip" data-placement="top" title="Linux">Redis</a>
+				
+			
+		
+        </footer>
+    </article>
+    <article class="blog-post-page-readmore">
+    	
+    	
+		
+			<a href="/2018/09/16/2018-09-16-R安装及语言矩阵运算/" class="blog-post-page-readmore-prev" data-toggle="tooltip" data-placement="top" title="R安装及语言矩阵运算">上一篇</a>
+		
+
+		
+		
+			<a href="/2018/09/15/2018-09-15-Redis两种持久化方式/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="Redis 持久化策略">下一篇</a>
+		
+
+        <div style="clear: both;"></div>
+    </article>
+
+    <article class="blog-post-block blog-post-page-content">
+            <div class="row">
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span class="post-comments-btn btn btn-info btn-block" data-toggle="tooltip" data-placement="top" title="本站采用Disqus评论组件，若您没有科学上网可能会无法查看并评论">加载评论</span>
+                </div>
+            
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-donate-content">
+                        <span id="post-donate-btn" class="btn btn-danger btn-block" data-toggle="tooltip" data-placement="top" title="如果您觉得本文还不错或者对您有帮助，可以考虑打赏一下作者哦">打赏本文</span>
+                    </span>
+                </div>
+                <div class="col-md-4 col-sm-4 post-page-more-btn">
+                    <span data-toggle="modal" data-target="#post-qrcode-content">
+                        <span><span id="post-qrcode-btn" class="btn btn-success btn-block" data-toggle="tooltip" data-placement="top" title="微信扫描二维码手机端查看本文及分享本文">二维码</span></span>
+                    </span>
+                </div>
+            </div>
+        <div class="post-more-function-br"></div>
+
+        <div class="modal fade" id="post-donate-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">打赏本文</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-donate-content">
+                            <div class="col-md-4">
+                                <p>支付宝</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>微信</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                            <div class="col-md-4">
+                                <p>财付通</p>
+                                <img class="post-donate-content-img no-lightbox" src="http://dl.weic96.cn/logo.png">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="post-qrcode-content" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">文章二维码</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row post-qrcode-content">
+                            <span class="post-qrcode-content-canvas"></span>
+                            <img class="post-qrcode-content-img no-lightbox" src>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // post QRcode
+            // 中文转码
+            function toUtf8(str) {
+                var out, i, len, c;
+                out = "";
+                len = str.length;
+                for (i = 0; i < len; i++) {
+                    c = str.charCodeAt(i);
+                    if ((c >= 0x0001) && (c <= 0x007F)) {
+                        out += str.charAt(i);
+                    } else if (c > 0x07FF) {
+                        out += String.fromCharCode(0xE0 | ((c >> 12) & 0x0F));
+                        out += String.fromCharCode(0x80 | ((c >> 6) & 0x3F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    } else {
+                        out += String.fromCharCode(0xC0 | ((c >> 6) & 0x1F));
+                        out += String.fromCharCode(0x80 | ((c >> 0) & 0x3F));
+                    }
+                }
+                return out;
+            }
+            // 生成
+            var qrcode= $('.post-qrcode-content-canvas').qrcode({width: 150,height: 150,text: toUtf8("yihao.ml/2018/09/15/2018-09-15-Redis集群部署/")}).hide();
+            var canvas=qrcode.find('canvas').get(0);
+            $('.post-qrcode-content-img').attr('src',canvas.toDataURL('image/jpg'));
+        </script>
+
+        
+    </article>
+    
+</div>
+
+                
+            <footer class="blog-footer">
+                <p class="blog-footer-left">Copyright ©  2019 <a href="yihao.ml">YIHAO'S BLOG</a></p>
+                <p class="blog-footer-right">Powered by <a href="https://hexo.io" target="_blank">Hexo</a>,Theme <a href="https://note.isweic.com/themes-life/" target="_blank">Life</a></p>
+            </footer>
+        </div><!--博客主栏结束-->
+        <!--博客侧边栏开始-->
+        <div class="col-xl-3 blog-sidebar">
+            <div class="blog-sidebar-title">
+                <a href>YIHAO'S BLOG</a>
+            </div>
+            <div class="blog-sidebar-logo">
+                <img src="https://i.loli.net/2019/06/30/5d186da8d94aa29517.jpeg">
+            </div>
+            <div class="blog-sidebar-count blog-sidebar-padding">
+                <div class="blog-sidebar-count-left">
+                    <p class="blog-sidebar-count-p">126</p>
+                    <span class="blog-sidebar-count-span">文章</span>
+                </div>
+                <div class="blog-sidebar-count-right">
+                    <p class="blog-sidebar-count-p">46</p>
+                    <span class="blog-sidebar-count-span">标签</span>
+                </div>
+                <div style="clear: both;"></div>
+            </div>
+            <div class="blog-sidebar-icon blog-sidebar-padding">
+                <ul>
+                    <li><a href class="icon-github" target="_blank" data-toggle="tooltip" data-placement="top" title="Github"><i class="fa fa-github"></i></a></li>
+                    <li><a href class="icon-weibo" target="_blank" data-toggle="tooltip" data-placement="top" title="新浪微博"><i class="fa fa-weibo"></i></a></li>
+                    <li><a href class="icon-twitter" target="_blank" data-toggle="tooltip" data-placement="top" title="Twitter"><i class="fa fa-twitter"></i></a></li>
+                    <!--<li><a href="" class="icon-facebook" target="_blank" data-toggle="tooltip" data-placement="top" title="FaceBook"><i class="fa fa-facebook"></i></a></li>-->
+                    <li><a href="mailto:" class="icon-email" data-toggle="tooltip" data-placement="top" title="E-Mail"><i class="fa fa-envelope"></i></a></li>
+                    <li><a href class="icon-rss" data-toggle="tooltip" target="_blank" data-placement="top" title="RSS"><i class="fa fa-rss"></i></a></li>
+                </ul>
+            </div>
+            <div class="blog-sidebar-categories">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-folder-open"></i>&nbsp;文章分类</h4>
+                <ul class="list-group blog-sidebar-padding">
+                  
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/大数据/">大数据</a>
+                          <span class="badge badge-default badge-pill">39</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/博客/">博客</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/ubuntu/">ubuntu</a>
+                          <span class="badge badge-default badge-pill">12</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/前端/">前端</a>
+                          <span class="badge badge-default badge-pill">5</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/后端/">后端</a>
+                          <span class="badge badge-default badge-pill">28</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/软件/">软件</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/自动化测试/">自动化测试</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/编程语言/">编程语言</a>
+                          <span class="badge badge-default badge-pill">8</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/其他/">其他</a>
+                          <span class="badge badge-default badge-pill">4</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/Autodesk/">Autodesk</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/物联网/">物联网</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/云计算/">云计算</a>
+                          <span class="badge badge-default badge-pill">3</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/算法与数据结构/">算法与数据结构</a>
+                          <span class="badge badge-default badge-pill">7</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/分布式/">分布式</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/游戏开发/">游戏开发</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                  
+                </ul>
+            </div>
+            <div class="blog-sidebar-tags">
+                <h4 class="blog-sidebar-h4"><i class="fa fa-tag"></i>&nbsp;标签云</h4>
+                <ul class="blog-sidebar-tags-ul blog-sidebar-padding">
+                  
+                    
+                      <li><a href="/tags/ffmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ffmpeg">ffmpeg</a></li>
+                    
+                      <li><a href="/tags/redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="redis">redis</a></li>
+                    
+                      <li><a href="/tags/nodejs/" class="tag-could" data-toggle="tooltip" data-placement="top" title="nodejs">nodejs</a></li>
+                    
+                      <li><a href="/tags/hibernate/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hibernate">hibernate</a></li>
+                    
+                      <li><a href="/tags/Hadoop/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hadoop">Hadoop</a></li>
+                    
+                      <li><a href="/tags/Spring/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spring">Spring</a></li>
+                    
+                      <li><a href="/tags/struts/" class="tag-could" data-toggle="tooltip" data-placement="top" title="struts">struts</a></li>
+                    
+                      <li><a href="/tags/FFmpeg/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FFmpeg">FFmpeg</a></li>
+                    
+                      <li><a href="/tags/selenium/" class="tag-could" data-toggle="tooltip" data-placement="top" title="selenium">selenium</a></li>
+                    
+                      <li><a href="/tags/python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="python">python</a></li>
+                    
+                      <li><a href="/tags/问题总结/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题总结">问题总结</a></li>
+                    
+                      <li><a href="/tags/shiro/" class="tag-could" data-toggle="tooltip" data-placement="top" title="shiro">shiro</a></li>
+                    
+                      <li><a href="/tags/无聊/" class="tag-could" data-toggle="tooltip" data-placement="top" title="无聊">无聊</a></li>
+                    
+                      <li><a href="/tags/问题记录/" class="tag-could" data-toggle="tooltip" data-placement="top" title="问题记录">问题记录</a></li>
+                    
+                      <li><a href="/tags/ActiveMQ/" class="tag-could" data-toggle="tooltip" data-placement="top" title="ActiveMQ">ActiveMQ</a></li>
+                    
+                      <li><a href="/tags/Mybatis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Mybatis">Mybatis</a></li>
+                    
+                      <li><a href="/tags/Zookeeper/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Zookeeper">Zookeeper</a></li>
+                    
+                      <li><a href="/tags/RPC/" class="tag-could" data-toggle="tooltip" data-placement="top" title="RPC">RPC</a></li>
+                    
+                      <li><a href="/tags/MapReduce/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MapReduce">MapReduce</a></li>
+                    
+                      <li><a href="/tags/FTP/" class="tag-could" data-toggle="tooltip" data-placement="top" title="FTP">FTP</a></li>
+                    
+                      <li><a href="/tags/HDFS/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HDFS">HDFS</a></li>
+                    
+                      <li><a href="/tags/Hive/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hive">Hive</a></li>
+                    
+                      <li><a href="/tags/Flume/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Flume">Flume</a></li>
+                    
+                      <li><a href="/tags/Teamviewer/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Teamviewer">Teamviewer</a></li>
+                    
+                      <li><a href="/tags/forge/" class="tag-could" data-toggle="tooltip" data-placement="top" title="forge">forge</a></li>
+                    
+                      <li><a href="/tags/vue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="vue">vue</a></li>
+                    
+                      <li><a href="/tags/Scala/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Scala">Scala</a></li>
+                    
+                      <li><a href="/tags/Hbase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Hbase">Hbase</a></li>
+                    
+                      <li><a href="/tags/Raspberry-Pi/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Raspberry Pi">Raspberry Pi</a></li>
+                    
+                      <li><a href="/tags/git/" class="tag-could" data-toggle="tooltip" data-placement="top" title="git">git</a></li>
+                    
+                      <li><a href="/tags/Maven/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Maven">Maven</a></li>
+                    
+                      <li><a href="/tags/Python/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Python">Python</a></li>
+                    
+                      <li><a href="/tags/Spark/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Spark">Spark</a></li>
+                    
+                      <li><a href="/tags/InfluxDB/" class="tag-could" data-toggle="tooltip" data-placement="top" title="InfluxDB">InfluxDB</a></li>
+                    
+                      <li><a href="/tags/Java/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Java">Java</a></li>
+                    
+                      <li><a href="/tags/Redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Redis">Redis</a></li>
+                    
+                      <li><a href="/tags/MatLab/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MatLab">MatLab</a></li>
+                    
+                      <li><a href="/tags/Kafka/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Kafka">Kafka</a></li>
+                    
+                      <li><a href="/tags/WebSocket/" class="tag-could" data-toggle="tooltip" data-placement="top" title="WebSocket">WebSocket</a></li>
+                    
+                      <li><a href="/tags/Storm/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Storm">Storm</a></li>
+                    
+                      <li><a href="/tags/CDH/" class="tag-could" data-toggle="tooltip" data-placement="top" title="CDH">CDH</a></li>
+                    
+                      <li><a href="/tags/hue/" class="tag-could" data-toggle="tooltip" data-placement="top" title="hue">hue</a></li>
+                    
+                      <li><a href="/tags/HBase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HBase">HBase</a></li>
+                    
+                      <li><a href="/tags/JVM/" class="tag-could" data-toggle="tooltip" data-placement="top" title="JVM">JVM</a></li>
+                    
+                      <li><a href="/tags/Minecraft/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Minecraft">Minecraft</a></li>
+                    
+                      <li><a href="/tags/Azkaban/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Azkaban">Azkaban</a></li>
+                    
+                  
+                </ul>
+            </div>
+            <script>
+              // 博客侧栏标签云随机色
+              var tag_cloud = $('.tag-could');
+              tag_cloud.each(function () {
+                  var Cnum = 9;
+                  var Crand = parseInt(Math.random() * Cnum);
+                  $(this).addClass("tag-could" + Crand);
+              })
+            </script>
+            <!--返回顶部按钮-->
+            <div class="retop">
+                <i class="fa fa-angle-up"></i>
+            </div>
+        </div><!--博客侧边栏结束-->
+    </div>
+</div>
+<script src="/js/LeanStatistics.min.js"></script>
+<script src="/js/Life.js"></script>
+<script type="text/javascript">
+    hljs.initHighlightingOnLoad();
+    hljs.initLineNumbersOnLoad();
+    otherF();
+    LeanStatistics();
+    $(document).pjax('a', '#pjax-box', {fragment:'#pjax-box', timeout:8000}).on('pjax:complete', function() {
+      $('pre code').each(function(i, block){
+        hljs.highlightBlock(block);
+      })
+      $('code.hljs').each(function(i, block) {
+        hljs.lineNumbersBlock(block);
+      });
+      LeanStatistics();
+    }).on('pjax:start', function() { NProgress.start(); }).on('pjax:end',   function() {
+      NProgress.done();
+      otherF();
+    });
+</script>
+</body>
+</html>
