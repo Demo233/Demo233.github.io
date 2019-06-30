@@ -304,7 +304,7 @@
 <p>命令:tar –zxvf azkaban-sql-script-2.5.0.tar.gz</p>
 <p>将解压后的mysql 脚本,导入到mysql中:</p>
 <p>进入mysql</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> create database azkaban;</span></span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> use azkaban;</span></span><br><span class="line">Database changed</span><br><span class="line"><span class="meta">mysql&gt;</span><span class="bash"> <span class="built_in">source</span>/home/hadoop/azkaban-2.5.0/create-all-sql-2.5.0.sql;</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">mysql&gt;</span> create database azkaban;</span><br><span class="line"><span class="meta">mysql&gt;</span> use azkaban;</span><br><span class="line">Database changed</span><br><span class="line"><span class="meta">mysql&gt;</span> source/home/hadoop/azkaban-2.5.0/create-all-sql-2.5.0.sql;</span><br></pre></td></tr></table></figure>
 
 <h3 id="创建SSL配置"><a href="#创建SSL配置" class="headerlink" title="创建SSL配置"></a>创建SSL配置</h3><p>参考地址: <a href="http://docs.codehaus.org/display/JETTY/How+to+configure+SSL" target="_blank" rel="noopener">http://docs.codehaus.org/display/JETTY/How+to+configure+SSL</a></p>
 <p>命令: keytool -keystore keystore -alias jetty -genkey -keyalg RSA</p>
@@ -430,7 +430,7 @@
 <h2 id="Azkaban实战"><a href="#Azkaban实战" class="headerlink" title="Azkaban实战"></a>Azkaban实战</h2><p>Azkaba内置的任务类型支持command、java</p>
 <h2 id="Command类型单一job示例"><a href="#Command类型单一job示例" class="headerlink" title="Command类型单一job示例"></a>Command类型单一job示例</h2><p>1、创建job描述文件</p>
 <p>vi command.job</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">command.job</span></span><br><span class="line">type=command</span><br><span class="line">command=echo 'hello'</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>command.job</span><br><span class="line">type=command</span><br><span class="line">command=echo 'hello'</span><br></pre></td></tr></table></figure>
 
 <p>2、将job资源文件打包成zip文件<br>zip -r command.zip command.job</p>
 <p>3、通过azkaban的web管理平台创建project并上传job压缩包</p>
@@ -441,23 +441,23 @@
 <p>4、启动执行该job</p>
 <h2 id="Command类型多job工作流flow"><a href="#Command类型多job工作流flow" class="headerlink" title="Command类型多job工作流flow"></a>Command类型多job工作流flow</h2><p>1、创建有依赖关系的多个job描述</p>
 <p>第一个job：foo.job</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> foo.job</span></span><br><span class="line">type=command</span><br><span class="line">command=echo foo</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> foo.job</span><br><span class="line">type=command</span><br><span class="line">command=echo foo</span><br></pre></td></tr></table></figure>
 
 <p>第二个job：bar.job依赖foo.job</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> bar.job</span></span><br><span class="line">type=command</span><br><span class="line">dependencies=foo</span><br><span class="line">command=echo bar</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> bar.job</span><br><span class="line">type=command</span><br><span class="line">dependencies=foo</span><br><span class="line">command=echo bar</span><br></pre></td></tr></table></figure>
 
 <p>2、将所有job资源文件打到一个zip包中</p>
 <p>3、在azkaban的web管理界面创建工程并上传zip包</p>
 <p>4、启动工作流flow</p>
 <h2 id="HDFS操作任务"><a href="#HDFS操作任务" class="headerlink" title="HDFS操作任务"></a>HDFS操作任务</h2><p>1、创建job描述文件</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash">fs.job</span></span><br><span class="line">type=command</span><br><span class="line">command=/home/hadoop/apps/hadoop-2.6.1/bin/hadoop fs -mkdir /azaz</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span>fs.job</span><br><span class="line">type=command</span><br><span class="line">command=/home/hadoop/apps/hadoop-2.6.1/bin/hadoop fs -mkdir /azaz</span><br></pre></td></tr></table></figure>
 
 <p>2、将job资源文件打包成zip文件</p>
 <p>3、通过azkaban的web管理平台创建project并上传job压缩包</p>
 <p>4、启动执行该job</p>
 <h2 id="MAPREDUCE任务"><a href="#MAPREDUCE任务" class="headerlink" title="MAPREDUCE任务"></a>MAPREDUCE任务</h2><p>Mr任务依然可以使用command的job类型来执行</p>
 <p>1、创建job描述文件，及mr程序jar包（示例中直接使用hadoop自带的examplejar）</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> mrwc.job</span></span><br><span class="line">type=command</span><br><span class="line">command=/home/hadoop/apps/hadoop-2.6.1/bin/hadoop  jar hadoop-mapreduce-examples-2.6.1.jar wordcount /wordcount/input /wordcount/azout</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> mrwc.job</span><br><span class="line">type=command</span><br><span class="line">command=/home/hadoop/apps/hadoop-2.6.1/bin/hadoop  jar hadoop-mapreduce-examples-2.6.1.jar wordcount /wordcount/input /wordcount/azout</span><br></pre></td></tr></table></figure>
 
 <p>2、将所有job资源文件打到一个zip包中</p>
 <p>3、在azkaban的web管理界面创建工程并上传zip包</p>
@@ -467,7 +467,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">use default;</span><br><span class="line">load data local inpath '/home/hadoop/demo.json' into table statis;</span><br><span class="line">insert into table statis_new</span><br><span class="line">select get_json_object(line,'$.username') as username,get_json_object(line,'$.visitdate') as visitdate,get_json_object(line,'$.visit') as visitdate,get_json_object(line,'$.visit') as sumvisit from statis;</span><br><span class="line">insert overwrite table statis_new</span><br><span class="line">select A.username,A.visitdate,max(A.visit) as visit,sum(B.visit) as sumvisit</span><br><span class="line">from </span><br><span class="line">(select username,visitdate,sum(visit) as visit</span><br><span class="line">from statis_new</span><br><span class="line">group by username,visitdate)A</span><br><span class="line">inner join</span><br><span class="line">(select username,visitdate,sum(visit) as visit</span><br><span class="line">from statis_new</span><br><span class="line">group by username,visitdate)B</span><br><span class="line">on A.username = B.username</span><br><span class="line">where B.visitdate &lt;= A.visitdate</span><br><span class="line">group by A.username,A.visitdate;</span><br></pre></td></tr></table></figure>
 
 <p>Job描述文件：hivef.job</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> hivef.job</span></span><br><span class="line">type=command</span><br><span class="line">command=/home/hadoop/apps/hive/bin/hive -f 'test.sql'</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span> hivef.job</span><br><span class="line">type=command</span><br><span class="line">command=/home/hadoop/apps/hive/bin/hive -f 'test.sql'</span><br></pre></td></tr></table></figure>
 
 <p>2、将所有job资源文件打到一个zip包中</p>
 <p>3、在azkaban的web管理界面创建工程并上传zip包</p>
@@ -495,7 +495,7 @@
 
 		
 		
-			<a href="/2018/05/04/2018-05-04-hadoop-flume日志收集/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="flume日志收集系统部署">下一篇</a>
+			<a href="/2018/05/04/2018-05-04-hadoop-MapReduce小例子/" class="blog-post-page-readmore-next" data-toggle="tooltip" data-placement="top" title="MapReduce小例子">下一篇</a>
 		
 
         <div style="clear: both;"></div>
@@ -624,11 +624,11 @@
             </div>
             <div class="blog-sidebar-count blog-sidebar-padding">
                 <div class="blog-sidebar-count-left">
-                    <p class="blog-sidebar-count-p">126</p>
+                    <p class="blog-sidebar-count-p">131</p>
                     <span class="blog-sidebar-count-span">文章</span>
                 </div>
                 <div class="blog-sidebar-count-right">
-                    <p class="blog-sidebar-count-p">46</p>
+                    <p class="blog-sidebar-count-p">47</p>
                     <span class="blog-sidebar-count-span">标签</span>
                 </div>
                 <div style="clear: both;"></div>
@@ -670,12 +670,12 @@
                     
                       <li class="list-group-item justify-content-between">
                           <a href="/categories/后端/">后端</a>
-                          <span class="badge badge-default badge-pill">28</span>
+                          <span class="badge badge-default badge-pill">30</span>
                       </li>
                     
                       <li class="list-group-item justify-content-between">
                           <a href="/categories/软件/">软件</a>
-                          <span class="badge badge-default badge-pill">3</span>
+                          <span class="badge badge-default badge-pill">4</span>
                       </li>
                     
                       <li class="list-group-item justify-content-between">
@@ -690,7 +690,7 @@
                     
                       <li class="list-group-item justify-content-between">
                           <a href="/categories/其他/">其他</a>
-                          <span class="badge badge-default badge-pill">4</span>
+                          <span class="badge badge-default badge-pill">5</span>
                       </li>
                     
                       <li class="list-group-item justify-content-between">
@@ -720,6 +720,11 @@
                     
                       <li class="list-group-item justify-content-between">
                           <a href="/categories/游戏开发/">游戏开发</a>
+                          <span class="badge badge-default badge-pill">1</span>
+                      </li>
+                    
+                      <li class="list-group-item justify-content-between">
+                          <a href="/categories/转载/">转载</a>
                           <span class="badge badge-default badge-pill">1</span>
                       </li>
                     
@@ -803,6 +808,8 @@
                     
                       <li><a href="/tags/Redis/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Redis">Redis</a></li>
                     
+                      <li><a href="/tags/JVM/" class="tag-could" data-toggle="tooltip" data-placement="top" title="JVM">JVM</a></li>
+                    
                       <li><a href="/tags/MatLab/" class="tag-could" data-toggle="tooltip" data-placement="top" title="MatLab">MatLab</a></li>
                     
                       <li><a href="/tags/Kafka/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Kafka">Kafka</a></li>
@@ -817,11 +824,11 @@
                     
                       <li><a href="/tags/HBase/" class="tag-could" data-toggle="tooltip" data-placement="top" title="HBase">HBase</a></li>
                     
-                      <li><a href="/tags/JVM/" class="tag-could" data-toggle="tooltip" data-placement="top" title="JVM">JVM</a></li>
-                    
                       <li><a href="/tags/Minecraft/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Minecraft">Minecraft</a></li>
                     
                       <li><a href="/tags/Azkaban/" class="tag-could" data-toggle="tooltip" data-placement="top" title="Azkaban">Azkaban</a></li>
+                    
+                      <li><a href="/tags/生活/" class="tag-could" data-toggle="tooltip" data-placement="top" title="生活">生活</a></li>
                     
                   
                 </ul>
